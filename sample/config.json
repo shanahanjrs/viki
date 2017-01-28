@@ -1,0 +1,9 @@
+{
+  "name":"sample job name",
+  "description":"A job that runs my custom shell script for server maintenance.",
+  "steps": [
+    "make",
+    "mycustomshellscript.sh --some-args",
+    "make clean"
+  ]
+}

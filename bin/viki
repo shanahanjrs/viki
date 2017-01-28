@@ -1,0 +1,81 @@
+#!/usr/bin/env python3
+
+""" Viki
+
+Webhook reciever and automation framework
+
+Usage:
+    jobs
+    job/<jobName>
+    job/<jobName>/run
+
+Maintainer:
+    John Shanahan <shanahan.jrs@gmail.com>
+
+License:
+    Apache 2.0
+    http://www.apache.org/licenses/LICENSE-2.0
+
+"""
+
+## Imports
+
+try:
+    from flask import Flask, request
+    from jobs import Jobs
+    import json
+except ImportError as error:
+    exit('ImportError: ' + error.message)
+
+## Setup
+
+app = Flask(__name__)
+job = Jobs()
+
+homeDirectory = "/usr/local/viki"
+
+debug = True
+
+## Routes
+
+@app.route("/")
+def root():
+    """ Home """
+    return json.dumps({"name":"viki", "version":"0.0.1"})
+
+@app.route("/jobs")
+def jobs():
+    """ List all jobs """
+
+    ret =  json.dumps(job.getJobs())
+
+    return ret
+
+@app.route("/job/<string:jobName>", methods = ['GET', 'POST', 'PUT'])
+def getJob(jobName):
+    """ Show single job details by name """
+
+    if request.method == 'POST':
+        ret = json.dumps(job.createJob(jobName))
+
+    if request.method == 'PUT':
+        ret = json.dumps(job.updateJob(jobName))
+
+    if request.method == 'GET':
+        ret = json.dumps(job.getJobByName(jobName))
+
+    return ret
+
+@app.route("/job/<string:jobName>/run")
+def runJob(jobName):
+    """ Run specific job by name """
+    return json.dumps(job.runJob(jobName))
+
+## Main
+
+if __name__ == "__main__":
+
+    if debug:
+        app.debug = True
+
+    app.run()
