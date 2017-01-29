@@ -16,6 +16,11 @@ License:
     Apache 2.0
     http://www.apache.org/licenses/LICENSE-2.0
 
+Todo:
+    - Add logging (replace the print statements with actual logging)
+    - Add Auth
+    - Make individual built dirs under .../jobs/<jobName>/<buildNumber>
+
 """
 
 ## Imports
@@ -27,6 +32,7 @@ try:
 except ImportError as error:
     exit('ImportError: ' + error.message)
 
+
 ## Setup
 
 app = Flask(__name__)
@@ -35,6 +41,7 @@ job = Jobs()
 homeDirectory = "/usr/local/viki"
 
 debug = True
+
 
 ## Routes
 
@@ -70,6 +77,7 @@ def getJob(jobName):
 def runJob(jobName):
     """ Run specific job by name """
     return json.dumps(job.runJob(jobName))
+
 
 ## Main
 
