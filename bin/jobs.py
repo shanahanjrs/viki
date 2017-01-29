@@ -3,7 +3,6 @@
 import os
 import subprocess
 import json
-import shlex
 import uuid
 
 class Jobs():
@@ -19,6 +18,9 @@ class Jobs():
 
         # Path to the jobs directory relative to self.home
         self.jobspath = self.home + "/" + "jobs"
+
+        # Name of job configuration file
+        self.jobConfigFile = "config.json"
 
     def _writeJobFile(self, file, text):
         """ _writeJobFile
@@ -52,23 +54,22 @@ class Jobs():
         string:command Shell command to run
         string:file path Where the command results (stdout) are stored
         Runs the given command and stores results in a file
-        Returns True if result code is < 1
-        Returns False if > 0
+        Returns Tuple (True|False, Return code)
         """
-        stdout = ""
         print('----> _runShellCommand')
         print('----> Arg: command: ' + command)
-        print('----> Arg: file: ' + file)
+        print('----> Arg: output file: ' + file)
 
-        # This may fix Popen not correctly storing the output of
+        # This fixes Popen not correctly storing the output of
         # echo "some string" in the output file
         command = "'" + command + "'"
+        print('----> command with single quotes: ' + command)
 
         # Generate output file for run results
         outputFile = open(file, 'a')
 
         process = subprocess.Popen(
-            shlex.split(command),
+            command,
             stdout=outputFile,
             stderr=subprocess.STDOUT,
             shell=True
@@ -83,8 +84,15 @@ class Jobs():
 
         # Get return code
         returnCode = process.poll()
+        print('----> return code: ' + str(returnCode))
 
-        return returnCode < 1
+        return True if returnCode == 0 else False, returnCode
+
+    def _dirtyRmRf(self, dir):
+        """ Executes a quick and dirty rm -rf dirName """
+
+        # Use subprocess because its easier to let bash do this than Python
+        removeTmp = subprocess.call('rm -rf ' + dir, shell=True)
 
 
     ## Job functions
@@ -142,33 +150,37 @@ class Jobs():
         return { "success":success, "message":message, "job":name, "exec":contents }
 
 
-    def createJob(self, name, jsonText):
+    def createJob(self, newName, jsonText):
         """ Adds a job """
+        message = "Job created successfully"
+        success = "1"
 
-        jobDir = self.jobspath + "/" + name
-        jobFilename = jobDir + "/" + jsonText
+        try:
 
-        # Remove existing job dir and files if it exists
-        if os.path.exists(jobDir):
+            jobDir = self.jobspath + "/" + newName
+            jobFilename = jobDir + "/" + self.jobConfigFile
 
-            for file in os.listdir(jobDir):
+            # Remove existing job conf
+            if os.path.exists(jobFilename):
+                self._dirtyRmRf(jobFilename)
 
-                # If file
-                if os.path.isfile(jobDir + "/" + file):
-                    os.remove(jobDir + "/" + file)
+            # Create Json array for _writeJobFile
+            jsonObj = json.loads(jsonText)
+            jsonObj['runNumber'] = 0
+            jsonObj['lastSuccessfulRun'] = 0
+            jsonObj['lastFailedRun'] = 0
+            jsonObj['name'] = newName
+            jsonText = str(jsonObj)
 
-                # If directory
-                if os.path.isdir(jobDir + "/" + file):
-                    os.rmdir(jobDir + "/" + file)
+            # Create job file
+            self._writeJobFile(jobFilename, jsonText)
 
-            # Then the now-empty directory
-            os.remove(jobDir)
+        except json.JSONDecoderError as error:
+            message = error.message
+            success = "0"
 
-        # Create job directory
-        os.makedirs(jobDir)
-        self._writeJobFile(jobFilename, jsonText)
+        ret = {"success":success, "message":message}
 
-        ret = {"success":"1", "message":"Job created"}
         return ret
 
 
@@ -185,7 +197,6 @@ class Jobs():
         """ Run a specific job """
         success = "1"
         message = "Run successful"
-        results = ""
         returnCode = 0
 
         # Create job directory and file path names
@@ -223,26 +234,26 @@ class Jobs():
             # where it will not get removed after each run
             fileName = tmpCwd + "/" + "output.txt"
 
-            # Grab the steps
+            # Grab the json array "steps" from
+            # jobs/jobName/config.json file
             jobSteps = jobJson['steps']
 
             # Execute them individually
             # If any of these steps fail then we stop execution
             for step in jobSteps:
 
-                # Debug output file
+                # Debug output file **remove me eventually**
                 fileName = "/usr/local/viki/jobs/testoutput.txt"
 
-                _ = self._runShellCommand(step, fileName)
+                successBool, returnCode = self._runShellCommand(step, fileName)
 
-                if not _:
-                    print('Job step failed: ' + str(step))
-                    returnCode = _
-                    break
+                if not successBool:
+                    print('----> Job step failed: ' + str(step))
+                    print('    ---> with exit code: ' + str(returnCode))
+                    raise SystemError('Build step failed')
 
             # Clean up tmp workdir
-            # Use subprocess because its easier to let bash do this than Python
-            removeTmp = subprocess.call('rm -rf ' + tmpCwd, shell=True)
+            self._dirtyRmRf(tmpCwd)
 
         except OSError as error:
             message = error.message
@@ -250,5 +261,8 @@ class Jobs():
         except subprocess.CalledProcessError as error:
             message = error.message
             success = "0"
+        except SystemError as error:
+            message = error.message
+            success = "0"
 
-        return { "success":success, "message":message, "result":results, "returnCode":returnCode }
+        return { "success":success, "message":message, "returnCode":returnCode }

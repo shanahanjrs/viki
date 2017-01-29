@@ -61,17 +61,26 @@ def jobs():
 @app.route("/job/<string:jobName>", methods = ['GET', 'POST', 'PUT'])
 def getJob(jobName):
     """ Show single job details by name """
+    ret = None
 
     if request.method == 'POST':
-        ret = json.dumps(job.createJob(jobName))
+        # Requires "application/json" mime type and valid JSON body
+        # containing description, and steps
+        jobConfig = request.get_json()
+        ret = job.createJob(jobName, jobConfig)
 
     if request.method == 'PUT':
-        ret = json.dumps(job.updateJob(jobName))
+        # Requires "application/json" mime type and valid JSON body
+        # containing field/s to be updated
+        ret = job.updateJob(jobName)
 
     if request.method == 'GET':
-        ret = json.dumps(job.getJobByName(jobName))
+        ret = job.getJobByName(jobName)
 
-    return ret
+    if ret is None:
+        ret = {"success":0, "message":"Failed"}
+
+    return json.dumps(ret)
 
 @app.route("/job/<string:jobName>/run")
 def runJob(jobName):
