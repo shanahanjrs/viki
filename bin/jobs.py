@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import ast
 import os
 import subprocess
 import json
@@ -11,13 +12,18 @@ class Jobs():
     ## Jobs internals
 
     def __init__(self):
-        """ Initialize jobs handler """
+        """ Initialize jobs handler
+        Vars for use:
+        home: Viki's home directory. Usually /usr/local/viki
+        jobsPath: Path to Viki's jobs directory. Usually /usr/local/viki/jobs
+        jobConfigFile: Name of the config for each individual job. Usually 'config.json'
+        """
 
         # Change to just /home/viki eventually
         self.home = "/usr/local/viki"
 
         # Path to the jobs directory relative to self.home
-        self.jobspath = self.home + "/" + "jobs"
+        self.jobsPath = self.home + "/" + "jobs"
 
         # Name of job configuration file
         self.jobConfigFile = "config.json"
@@ -27,11 +33,16 @@ class Jobs():
         Takes a filename and textblob and
         attempts to write the text to that file
         """
+        print('---> _writeJobFile')
+        print('---> _writeJobFile: Arg: file: ' + str(file))
+        print('---> _writeJobFile: Arg: test: ' + str(text))
+
         if not file or not text:
             return False
 
+        # This will not work if the directory does not exist
         with open(file, 'w') as fileObj:
-            fileObj.write(text)
+            fileObj.write(json.dumps(text))
 
         return fileObj.close()
 
@@ -89,9 +100,9 @@ class Jobs():
         return True if returnCode == 0 else False, returnCode
 
     def _dirtyRmRf(self, dir):
-        """ Executes a quick and dirty rm -rf dirName """
-
-        # Use subprocess because its easier to let bash do this than Python
+        """ Executes a quick and dirty rm -rf dirName
+        Use subprocess because its easier to let bash do this than Python
+        """
         removeTmp = subprocess.call('rm -rf ' + dir, shell=True)
 
 
@@ -104,19 +115,18 @@ class Jobs():
         """
         message = "Ok"
         success = "1"
-        name = "jobs"
         jobsList = []
 
         try:
 
             # Get all job dirs
-            jobsList = os.listdir(self.jobspath)
+            jobsList = os.walk(self.jobsPath).next()[1]
 
         except OSError as error:
             message = error.message
             success = "0"
 
-        ret = { "success":success, "message":message, "name":name, "jobs":jobsList }
+        ret = { "success":success, "message":message, "jobs":jobsList }
 
         return ret
 
@@ -135,7 +145,7 @@ class Jobs():
             if name is None:
                 raise ValueError('Missing required field: jobName')
 
-            jobDir = self.jobspath + "/" + name
+            jobDir = self.jobsPath + "/" + name
 
             if os.path.isdir(jobDir):
                 with open(jobDir + "/" + self.jobConfigFile, 'r') as jobFile:
@@ -147,7 +157,7 @@ class Jobs():
             success = "0"
             message = error.message
 
-        return { "success":success, "message":message, "job":name, "exec":contents }
+        return { "success":success, "message":message, "job":name, "body":contents }
 
 
     def createJob(self, newName, jsonText):
@@ -155,27 +165,40 @@ class Jobs():
         message = "Job created successfully"
         success = "1"
 
+        print('----> createJob')
+
         try:
 
-            jobDir = self.jobspath + "/" + newName
+            # Generate path and file name
+            jobDir = self.jobsPath + "/" + newName
             jobFilename = jobDir + "/" + self.jobConfigFile
 
-            # Remove existing job conf
-            if os.path.exists(jobFilename):
-                self._dirtyRmRf(jobFilename)
+            # Bail if
+            if os.path.exists(jobDir):
+                raise SystemError('Job directory already exists')
+            else:
+                os.mkdir(jobDir)
 
             # Create Json array for _writeJobFile
-            jsonObj = json.loads(jsonText)
+            # todo: Would we be able to avoid this if we remove the str() from around request.get_json() ?
+            jsonObj = ast.literal_eval(jsonText)
+            print('----> jsonObj: ' + str(jsonObj))
+
+            if not jsonObj['description']:
+                raise ValueError('Missing description')
+
+            if not jsonObj['steps']:
+                raise ValueError('Missing steps')
+
             jsonObj['runNumber'] = 0
             jsonObj['lastSuccessfulRun'] = 0
             jsonObj['lastFailedRun'] = 0
             jsonObj['name'] = newName
-            jsonText = str(jsonObj)
 
             # Create job file
-            self._writeJobFile(jobFilename, jsonText)
+            self._writeJobFile(jobFilename, jsonObj)
 
-        except json.JSONDecoderError as error:
+        except (ValueError, SystemError) as error:
             message = error.message
             success = "0"
 
@@ -187,8 +210,12 @@ class Jobs():
     def updateJob(self, name):
         """ Update an existing job """
         success = "1"
-        #message = "Run successful"
         message = "-- Under Construction --"
+        jobFilename = "Placeholder"
+
+        # Remove existing job conf
+        if os.path.exists(jobFilename):
+            self._dirtyRmRf(jobFilename)
 
         return { "success":success, "message":message }
 
@@ -200,7 +227,7 @@ class Jobs():
         returnCode = 0
 
         # Create job directory and file path names
-        jobDir = self.jobspath + "/" + name
+        jobDir = self.jobsPath + "/" + name
         jobConfigJsonFile = jobDir + "/" + "config.json"
 
         try:
@@ -240,13 +267,18 @@ class Jobs():
 
             # Execute them individually
             # If any of these steps fail then we stop execution
+            # The steps are stored as an array of strings executed in order
+            # Example in sample/config.json
             for step in jobSteps:
 
-                # Debug output file **remove me eventually**
+                # Debug output file - todo: **remove me eventually**
                 fileName = "/usr/local/viki/jobs/testoutput.txt"
 
+                # Every time we run a step via _runShellCommand it returns a tuple:
+                # success True|False and the return code of the command
                 successBool, returnCode = self._runShellCommand(step, fileName)
 
+                # If unsuccessful stop execution
                 if not successBool:
                     print('----> Job step failed: ' + str(step))
                     print('    ---> with exit code: ' + str(returnCode))
@@ -255,14 +287,36 @@ class Jobs():
             # Clean up tmp workdir
             self._dirtyRmRf(tmpCwd)
 
-        except OSError as error:
-            message = error.message
-            success = "0"
-        except subprocess.CalledProcessError as error:
-            message = error.message
-            success = "0"
-        except SystemError as error:
+        except (OSError, subprocess.CalledProcessError, SystemError) as error:
             message = error.message
             success = "0"
 
         return { "success":success, "message":message, "returnCode":returnCode }
+
+    def deleteJob(self, name):
+        """ Removes a job by name
+        Takes a job's name and removes the directory that the job lives in
+        """
+        success = "1"
+        message = "Job deleted"
+
+        try:
+
+            if name is None:
+                raise ValueError('Missing job name')
+
+            jobDir = self.jobsPath + '/' + name
+
+            # Check job directory exists
+            # Otherwise raise OSError
+            if not os.path.isdir(jobDir):
+                raise OSError('Job not found')
+
+            # Remove the job directory
+            self._dirtyRmRf(jobDir)
+
+        except (OSError, ValueError) as error:
+            message = error.message
+            success = "0"
+
+        return { "success":success, "message":message }

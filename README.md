@@ -2,7 +2,6 @@
 #####A command line based webhook reciever and automation job runner.
 
 ## Features of Viki
-
 - Simple to start up and use
 - Small and lightweight
 - Trigger a job run automatically via Webhook or manually with the command line

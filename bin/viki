@@ -26,7 +26,7 @@ Todo:
 ## Imports
 
 try:
-    from flask import Flask, request
+    from flask import Flask, request, jsonify
     from jobs import Jobs
     import json
 except ImportError as error:
@@ -48,25 +48,29 @@ debug = True
 @app.route("/")
 def root():
     """ Home """
-    return json.dumps({"name":"viki", "version":"0.0.1"})
+    return jsonify({"name":"viki", "version":"0.0.1"})
 
 @app.route("/jobs")
 def jobs():
     """ List all jobs """
 
-    ret =  json.dumps(job.getJobs())
+    ret =  jsonify(job.getJobs())
 
     return ret
 
-@app.route("/job/<string:jobName>", methods = ['GET', 'POST', 'PUT'])
+@app.route("/job/<string:jobName>", methods = ['GET', 'POST', 'PUT', 'DELETE'])
 def getJob(jobName):
     """ Show single job details by name """
     ret = None
 
+    if request.method == 'GET':
+        # Retrieve a jobs details
+        ret = job.getJobByName(jobName)
+
     if request.method == 'POST':
         # Requires "application/json" mime type and valid JSON body
         # containing description, and steps
-        jobConfig = request.get_json()
+        jobConfig = str(request.get_json())
         ret = job.createJob(jobName, jobConfig)
 
     if request.method == 'PUT':
@@ -74,18 +78,19 @@ def getJob(jobName):
         # containing field/s to be updated
         ret = job.updateJob(jobName)
 
-    if request.method == 'GET':
-        ret = job.getJobByName(jobName)
+    if request.method == 'DELETE':
+        # Deletes a job from the repository
+        ret = job.deleteJob(jobName)
 
     if ret is None:
         ret = {"success":0, "message":"Failed"}
 
-    return json.dumps(ret)
+    return jsonify(ret)
 
 @app.route("/job/<string:jobName>/run")
 def runJob(jobName):
     """ Run specific job by name """
-    return json.dumps(job.runJob(jobName))
+    return jsonify(job.runJob(jobName))
 
 
 ## Main
