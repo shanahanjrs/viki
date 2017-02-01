@@ -23,10 +23,11 @@ Todo:
     - Add funcs to count lastSuccessfulRun and lastFailedRun
     - Add Redis support
     - Create a routes file for all the api endpoints to be structured/organized
+    - Testing
 
 """
 
-## Imports
+### Imports
 
 try:
     from flask import Flask, request, jsonify
@@ -37,14 +38,14 @@ except ImportError as error:
     exit('ImportError: ' + str(error))
 
 
-## Setup
+### Setup
 
 # Classes
 app = Flask(__name__)
 job = Jobs()
 
 # Viki globals
-homeDirectory = "/usr/local/viki"
+home_directory = "/usr/local/viki"
 debug = True
 
 # Redis
@@ -59,7 +60,7 @@ redisconn = redis.Redis(
 )
 
 
-## Routes
+### Routes
 
 @app.route("/")
 def root():
@@ -75,28 +76,28 @@ def jobs():
     return ret
 
 @app.route("/job/<string:jobName>", methods = ['GET', 'POST', 'PUT', 'DELETE'])
-def getJob(jobName):
+def get_job(jobName):
     """ Show single job details by name """
     ret = None
 
     if request.method == 'GET':
         # Retrieve a jobs details
-        ret = job.getJobByName(jobName)
+        ret = job.get_job_by_name(jobName)
 
     if request.method == 'POST':
         # Requires "application/json" mime type and valid JSON body
         # containing description, and steps
         jobConfig = str(request.get_json())
-        ret = job.createJob(jobName, jobConfig)
+        ret = job.create_job(jobName, jobConfig)
 
     if request.method == 'PUT':
         # Requires "application/json" mime type and valid JSON body
         # containing field/s to be updated
-        ret = job.updateJob(jobName)
+        ret = job.update_job(jobName)
 
     if request.method == 'DELETE':
         # Deletes a job from the repository
-        ret = job.deleteJob(jobName)
+        ret = job.delete_job(jobName)
 
     if ret is None:
         ret = {"success":0, "message":"Failed"}
@@ -104,12 +105,12 @@ def getJob(jobName):
     return jsonify(ret)
 
 @app.route("/job/<string:jobName>/run")
-def runJob(jobName):
+def run_job(jobName):
     """ Run specific job by name """
-    return jsonify(job.runJob(jobName))
+    return jsonify(job.run_job(jobName))
 
 
-## Main
+### Main
 
 if __name__ == "__main__":
 

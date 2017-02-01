@@ -9,7 +9,7 @@ import uuid
 class Jobs():
     """ Jobs library for viki """
 
-    ## Jobs internals
+    ### Jobs internals
 
     def __init__(self):
         """ Initialize jobs handler
@@ -104,9 +104,9 @@ class Jobs():
         subprocess.call('rm -rf ' + dir, shell=True)
 
 
-    ## Job functions
+    ### Job functions
 
-    def getJobs(self):
+    def get_jobs(self):
         """
         List jobs in ~/viki/jobs
         Takes no parameters
@@ -130,7 +130,7 @@ class Jobs():
         return ret
 
 
-    def getJobByName(self, name):
+    def get_job_by_name(self, name):
         """
         Get details of a single job by name
         string:name Name of specific job
@@ -158,7 +158,7 @@ class Jobs():
         return { "success":success, "message":message, "name":name, "config_json":contents }
 
 
-    def createJob(self, new_name, json_text):
+    def create_job(self, new_name, json_text):
         """ Adds a job """
         message = "Job created successfully"
         success = "1"
@@ -205,7 +205,7 @@ class Jobs():
         return ret
 
 
-    def updateJob(self, name):
+    def update_job(self, name):
         """ Update an existing job """
         success = "1"
         message = "-- Under Construction --"
@@ -218,7 +218,7 @@ class Jobs():
         return { "success":success, "message":message }
 
 
-    def runJob(self, name):
+    def run_job(self, name):
         """ Run a specific job """
         success = "1"
         message = "Run successful"
@@ -291,7 +291,7 @@ class Jobs():
 
         return { "success":success, "message":message, "return_code":return_code }
 
-    def deleteJob(self, name):
+    def delete_job(self, name):
         """ Removes a job by name
         Takes a job's name and removes the directory that the job lives in
         """
