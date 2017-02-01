@@ -20,6 +20,9 @@ Todo:
     - Add logging (replace the print statements with actual logging)
     - Add Auth
     - Make individual built dirs under .../jobs/<jobName>/<buildNumber>
+    - Add funcs to count lastSuccessfulRun and lastFailedRun
+    - Add Redis support
+    - Create a routes file for all the api endpoints to be structured/organized
 
 """
 
@@ -27,16 +30,22 @@ Todo:
 
 try:
     from flask import Flask, request, jsonify
-    from jobs import Jobs
+    from lib.jobs import Jobs
     import json
+    import redis
 except ImportError as error:
-    exit('ImportError: ' + error.message)
+    exit('ImportError: ' + str(error))
 
 
 ## Setup
 
 app = Flask(__name__)
 job = Jobs()
+redisconn = redis.Redis(
+    host="localhost",
+    port=8888,
+    password="vikiredis"
+)
 
 homeDirectory = "/usr/local/viki"
 
@@ -91,6 +100,7 @@ def getJob(jobName):
 def runJob(jobName):
     """ Run specific job by name """
     return jsonify(job.runJob(jobName))
+
 
 
 ## Main

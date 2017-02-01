@@ -4,6 +4,9 @@
   "runNumber": 0,
   "lastSuccessfulRun": 0,
   "lastFailedRun": 0,
+  "trigger": {
+    "cron": "* * * * *"
+  },
   "steps": [
     "make deploy",
     "mycustomshellscript.sh --some-args",
