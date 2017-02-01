@@ -39,17 +39,24 @@ except ImportError as error:
 
 ## Setup
 
+# Classes
 app = Flask(__name__)
 job = Jobs()
-redisconn = redis.Redis(
-    host="localhost",
-    port=8888,
-    password="vikiredis"
-)
 
+# Viki globals
 homeDirectory = "/usr/local/viki"
-
 debug = True
+
+# Redis
+redis_host = ""
+redis_port = 0000
+redis_password = ""
+
+redisconn = redis.Redis(
+    host=redis_host,
+    port=redis_port,
+    password=redis_password
+)
 
 
 ## Routes
@@ -100,7 +107,6 @@ def getJob(jobName):
 def runJob(jobName):
     """ Run specific job by name """
     return jsonify(job.runJob(jobName))
-
 
 
 ## Main
