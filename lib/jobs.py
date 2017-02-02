@@ -5,6 +5,7 @@ import os
 import subprocess
 import json
 import uuid
+import shlex
 
 class Jobs():
     """ Jobs library for viki """
@@ -61,7 +62,7 @@ class Jobs():
 
         return ret
 
-    def _run_shell_command(self, command, file):
+    def _run_shell_command(self, command, output_filename):
         """ _run_shell_command
         string:command Shell command to run
         string:file path Where the command results (stdout) are stored
@@ -69,21 +70,16 @@ class Jobs():
         Returns Tuple (True|False, Return code)
         """
 
-        print('----> _run_shell_command')
-        print('----> Arg: command: ' + command)
-        print('----> Arg: output file: ' + file)
-
         # This fixes Popen not correctly storing the output of
         # echo "some string" in the output file
-        command = "'" + command + "'"
-        print('----> command with single quotes: ' + command)
+        command = shlex.split("'" + command + "'")
 
         # Generate output file for run results
-        output_file = open(file, 'a')
+        output_file_obj = open(output_filename, 'a')
 
         process = subprocess.Popen(
             command,
-            stdout=output_file,
+            stdout=output_file_obj,
             stderr=subprocess.STDOUT,
             shell=True
         )
@@ -92,10 +88,10 @@ class Jobs():
             # Not finished
             pass
 
-        output_file.close()
+        output_file_obj.close()
         return_code = process.poll()
 
-        return True if return_code == 0 else False, return_code
+        return (True, return_code) if return_code == 0 else (False, return_code)
 
     def _dirty_rm_rf(self, dir):
         """ Executes a quick and dirty rm -rf dirName
