@@ -34,9 +34,6 @@ class Jobs():
         Takes a filename and textblob and
         attempts to write the text to that file
         """
-        print('---> _write_job_file')
-        print('---> _write_job_file: Arg: file: ' + str(file))
-        print('---> _write_job_file: Arg: test: ' + str(text))
 
         if not file or not text:
             return False
@@ -62,7 +59,7 @@ class Jobs():
 
         return ret
 
-    def _run_shell_command(self, command, output_filename):
+    def _run_shell_command(self, raw_command, output_filename):
         """ _run_shell_command
         string:command Shell command to run
         string:file path Where the command results (stdout) are stored
@@ -70,12 +67,15 @@ class Jobs():
         Returns Tuple (True|False, Return code)
         """
 
-        # This fixes Popen not correctly storing the output of
-        # echo "some string" in the output file
-        command = shlex.split("'" + command + "'")
-
         # Generate output file for run results
         output_file_obj = open(output_filename, 'a')
+
+        # Put the command being executed inside the output file
+        output_file_obj.write('--> ' + raw_command + '\n')
+
+        # This fixes Popen not correctly storing the output of
+        # echo "some string" in the output file
+        command = shlex.split("'" + raw_command + "'")
 
         process = subprocess.Popen(
             command,
@@ -104,7 +104,7 @@ class Jobs():
 
     def get_jobs(self):
         """
-        List jobs in ~/viki/jobs
+        List jobs in /usr/local/viki/jobs
         Takes no parameters
         """
         message = "Ok"
@@ -114,8 +114,8 @@ class Jobs():
         try:
 
             # Get all job dirs
-            jobs_list = next(os.walk(self.jobs_path))
-            jobs_list = jobs_list[1]
+            jobs_dir_ls = next(os.walk(self.jobs_path))
+            jobs_list = jobs_dir_ls[1]
 
         except OSError as error:
             message = str(error)
@@ -159,8 +159,6 @@ class Jobs():
         message = "Job created successfully"
         success = "1"
 
-        print('----> createJob')
-
         try:
 
             # Generate path and file name
@@ -176,7 +174,7 @@ class Jobs():
             # Create Json array for _write_job_file
             # todo: Would we be able to avoid this if we remove the str() from around request.get_json() ?
             json_obj = ast.literal_eval(json_text)
-            print('----> json_obj: ' + str(json_obj))
+            # print('----> json_obj: ' + str(json_obj))
 
             if not json_obj['description']:
                 raise ValueError('Missing description')
@@ -224,6 +222,13 @@ class Jobs():
         job_dir = self.jobs_path + "/" + name
         job_config_json_file = job_dir + "/" + "config.json"
 
+        # Generate a tmp directory to work in
+        # Use uuid4() because it creates a truly random uuid
+        # and doesnt require any arguments and uuid1 uses
+        # the system network addr.
+        tmp_cwd = "/tmp/viki-" + str(uuid.uuid4())
+        os.mkdir(tmp_cwd)
+
         try:
 
             # Check job directory exists
@@ -242,48 +247,29 @@ class Jobs():
             if jobJson is False or jobJson is None:
                 raise OSError('Job file could not be read')
 
-            # Generate a tmp directory to work in
-            # Use uuid4() because it creates a truly random uuid
-            # and doesnt require any arguments and uuid1 uses
-            # the system network addr.
-            tmp_cwd = "/tmp/viki-" + str(uuid.uuid4())
-            print('----> tmpdir: ' + tmp_cwd)
-            os.mkdir(tmp_cwd)
-
             # Create filename path for output file
-            # todo: Move this to store the output in a new directory
-            # where it will not get removed after each run
-            filename = tmp_cwd + "/" + "output.txt"
+            # todo: Move this to store the output in each individual build dir
+            filename = job_dir + "/" + "output.txt"
 
-            # Grab the json array "steps" from
-            # jobs/jobName/config.json file
+            # Grab the json array "steps" from jobs/<jobName>/config.json
             jobSteps = jobJson['steps']
 
             # Execute them individually
             # If any of these steps fail then we stop execution
-            # The steps are stored as an array of strings executed in order
-            # Example in sample/config.json
             for step in jobSteps:
-
-                # Debug output file - todo: **remove me eventually**
-                filename = "/usr/local/viki/jobs/testoutput.txt"
-
-                # Every time we run a step via _run_shell_command it returns a tuple:
-                # success True|False and the return code of the command
                 successBool, return_code = self._run_shell_command(step, filename)
 
                 # If unsuccessful stop execution
                 if not successBool:
-                    print('----> Job step failed: ' + str(step))
-                    print('    ---> with exit code: ' + str(return_code))
                     raise SystemError('Build step failed')
 
-            # Clean up tmp workdir
-            self._dirty_rm_rf(tmp_cwd)
 
         except (OSError, subprocess.CalledProcessError, SystemError) as error:
             message = str(error)
             success = "0"
+
+        # Clean up tmp workdir
+        self._dirty_rm_rf(tmp_cwd)
 
         return { "success":success, "message":message, "return_code":return_code }
 

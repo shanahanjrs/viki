@@ -1,5 +1,5 @@
 # Viki
-#####A command line based webhook reciever and automation job runner.
+##### A Job and Build automation platform utilizing scheduling and webhook triggers
 
 ## Features of Viki
 - Simple to start up and use
