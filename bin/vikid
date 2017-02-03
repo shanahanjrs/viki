@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 
-""" Viki
+""" Viki daemon
 
-Webhook reciever and automation framework
+The automation framework
 
 Usage:
     jobs
@@ -16,22 +16,13 @@ License:
     Apache 2.0
     http://www.apache.org/licenses/LICENSE-2.0
 
-Todo:
-    - Add logging (replace the print statements with actual logging)
-    - Add Auth
-    - Make individual built dirs under .../jobs/<jobName>/<buildNumber>
-    - Add funcs to count lastSuccessfulRun and lastFailedRun
-    - Add Redis support
-    - Create a routes file for all the api endpoints to be structured/organized
-    - Testing
-
 """
 
 ### Imports
 
 try:
     from flask import Flask, request, jsonify
-    from lib.jobs import Jobs
+    from viki.jobs import Jobs
     import os
     import json
     import redis
