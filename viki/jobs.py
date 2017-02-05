@@ -267,6 +267,9 @@ class Jobs():
         except (OSError, subprocess.CalledProcessError, SystemError) as error:
             message = str(error)
             success = "0"
+        except KeyError:
+            message = 'Job has no steps'
+            success = "0"
 
         # Clean up tmp workdir
         self._dirty_rm_rf(tmp_cwd)

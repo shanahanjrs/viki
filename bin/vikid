@@ -24,8 +24,7 @@ try:
     from flask import Flask, request, jsonify
     from viki.jobs import Jobs
     import os
-    import json
-    import redis
+    import sqlite3
     import logging
 except ImportError as error:
     exit('ImportError: ' + str(error))
@@ -34,27 +33,20 @@ except ImportError as error:
 ### Setup
 debug = True
 
-# Classes
+# Classes / globals
 app = Flask(__name__)
 job = Jobs()
 
-# Viki globals
 home_directory = "/usr/local/viki"
 log_dir = "/usr/local/viki/logs"
 log_file = log_dir + "/" + "viki.log"
 log_level = logging.WARNING
 
-# Redis
-redis_host = ""
-redis_port = 0000
-redis_password = ""
+# Sqlite
+# sqlite_file = "/path/to/sqlite3/file"
 
-redisconn = redis.Redis(
-    host=redis_host,
-    port=redis_port,
-    password=redis_password
-)
-
+# sqlite_connection = sqlite3.connect(sqlite_file)
+# sqlite = sqlite_connection.cursor()
 
 ### Routes
 

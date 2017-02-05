@@ -1,8 +1,20 @@
 #!/usr/bin/env python3
 
+### Imports
 
 import sys
-import viki.jobs
+from viki.jobs import Jobs
+
+### Setup
+debug = True
+
+# Classes / globals
+job = Jobs()
+
+### Private funcs
+
+def _version():
+    print({"name":"viki", "version":"0.0.1"})
 
 def _usage():
     """ Print viki-cli usage"""
@@ -12,15 +24,44 @@ def _usage():
     print('    viki r|run <job_name>')
     sys.exit(1)
 
+def _list():
+    ret = job.get_jobs()
+    return str(ret)
+
+def _run(job_name):
+    ret = job.run_job(job_name)
+    return str(ret)
+
+### Main
+
 def main(args):
     """ Main """
 
     if len(args) < 2:
         _usage()
 
-    args = list(map(lambda x: x.replace("-", ""), args))
+    viki_action = args[1]
 
-    print(args)
+    action_help = [
+            'h', '-h', '-h', 'help', '-help', '--help'
+        ]
+
+    action_list = [
+            'l', '-l', '-l', 'll', '-ll', '--ll', 'list', '-list', '--list'
+        ]
+
+    action_run = [
+            'r', '-r', 'run', '-run', '--run'
+    ]
+
+    if viki_action in action_help:
+        _usage()
+    elif viki_action in action_list:
+        print(_list())
+    elif viki_action in action_run:
+        print(_run(args[2]))
+    else:
+        _usage()
 
 
 if __name__ == "__main__":
