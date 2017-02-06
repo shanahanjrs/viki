@@ -21,8 +21,8 @@ License:
 ### Imports
 
 try:
-    from flask import Flask, request, jsonify
-    from viki.jobs import Jobs
+    from flask import Flask, request, jsonify, render_template
+    from app.classes.jobs import Jobs
     import os
     import sqlite3
     import logging
@@ -54,7 +54,10 @@ log_level = logging.WARNING
 def root():
     """ Home """
     logging.info('--> Func:root')
-    return jsonify({"name":"viki", "version":"0.0.1"})
+
+    ret = {"name":"viki", "version":"0.0.1"}
+
+    return render_template('home.html', data=ret)
 
 @app.route("/jobs")
 def jobs():

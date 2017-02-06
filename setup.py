@@ -56,6 +56,6 @@ setup(
             #'viki=viki:main',
         #],
     #}
-    scripts = ['bin/vikid', 'bin/viki']
+    scripts = ['vikid', 'viki']
 
 )

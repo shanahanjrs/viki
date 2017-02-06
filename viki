@@ -3,7 +3,8 @@
 ### Imports
 
 import sys
-from viki.jobs import Jobs
+from app.classes.jobs import Jobs
+
 
 ### Setup
 debug = True

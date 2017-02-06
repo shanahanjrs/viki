@@ -1,7 +1,6 @@
 ##Todo:
-- Add Redis support
-  - Change jobs from using physical files to using Redis
-  - Should Viki use a physical file or Redis for config? 
+- Add Sqlite support
+  - Change jobs from using physical files to using Sqlite
 - Add Auth
   - User accounts
 - Add funcs to count lastSuccessfulRun and lastFailedRun
@@ -10,3 +9,4 @@
   - Does Flask allow importing routes?
 - Testing
   - Which test platform? Pytest?
+- Add routes file for api calls using Blueprints

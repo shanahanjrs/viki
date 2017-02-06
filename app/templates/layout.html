@@ -1,0 +1,33 @@
+<!doctype html>
+<title>Viki Automation</title>
+
+<!-- Favicon -->
+<link rel="shortcut icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
+<link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
+
+<!-- Import miligram css framework -->
+<!-- Google Fonts -->
+<link rel="stylesheet" href="//fonts.googleapis.com/css?family=Cousine:300,300italic,700,700italic">
+<!-- CSS Reset -->
+<link rel="stylesheet" href="//cdn.rawgit.com/necolas/normalize.css/master/normalize.css">
+<!-- Milligram CSS minified -->
+<link rel="stylesheet" href="//cdn.rawgit.com/milligram/milligram/master/dist/milligram.min.css">
+
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+
+<div class=page>
+    <h1>VIKI</h1>
+
+    <div class=metanav>
+
+    </div>
+
+    {% for message in get_flashed_messages() %}
+        <div class=flash>{{ message }}</div>
+    {% endfor %}
+
+
+    {% block body %}{% endblock %}
+
+
+</div>
