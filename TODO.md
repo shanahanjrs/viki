@@ -9,4 +9,7 @@
   - Does Flask allow importing routes?
 - Testing
   - Which test platform? Pytest?
-- Add routes file for api calls using Blueprints
+- Add routes file for Api calls using Blueprints
+- Fix up UI
+- Allow POST calls to provide arguments
+- Write scheduler for running cron jobs
