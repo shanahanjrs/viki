@@ -1,4 +1,5 @@
 language: python
+
 python:
   - "3.2"
   - "3.3"
@@ -10,7 +11,8 @@ python:
   - "3.7-dev"
   - "nightly"
 
-#install: "pip install -r requirements.txt"
-install: "pip install ."
+install:
+  -  "pip install -r requirements.txt"
 
-script: pytest app/test/
+script:
+  -  "pytest"
