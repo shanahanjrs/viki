@@ -13,4 +13,4 @@ python:
 #install: "pip install -r requirements.txt"
 install: "pip install ."
 
-script: pytest app/tests/
+script: pytest app/test/
