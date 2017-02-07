@@ -51,8 +51,9 @@ class Jobs():
         # This will not work if the directory does not exist
         with open(file, 'w') as file_obj:
             file_obj.write(json.dumps(text))
+            file_obj.close()
 
-        return file_obj.close()
+        return True
 
     def _read_job_file(self, file):
         """ _read_job_file
@@ -111,6 +112,8 @@ class Jobs():
             [b'/bin/bash', b'-c', 'rm -rf ' + dir]
         )
 
+        return True
+
 
     ### Job functions
 
@@ -120,7 +123,7 @@ class Jobs():
         Takes no parameters
         """
         message = "Ok"
-        success = "1"
+        success = 1
         jobs_list = []
 
         try:
@@ -131,7 +134,7 @@ class Jobs():
 
         except OSError as error:
             message = str(error)
-            success = "0"
+            success = 0
 
         ret = { "success":success, "message":message, "jobs":jobs_list }
 
@@ -143,8 +146,8 @@ class Jobs():
         Get details of a single job by name
         string:name Name of specific job
         """
-        success = "1"
         message = "Ok"
+        success = 1
         contents = ""
 
         try:
@@ -161,7 +164,7 @@ class Jobs():
 
         except (OSError, ValueError) as error:
             message = str(error)
-            success = "0"
+            success = 0
 
         return { "success":success, "message":message, "name":name, "config_json":contents }
 
@@ -169,7 +172,7 @@ class Jobs():
     def create_job(self, new_name, json_text):
         """ Adds a job """
         message = "Job created successfully"
-        success = "1"
+        success = 1
 
         try:
 
@@ -184,27 +187,26 @@ class Jobs():
                 os.mkdir(job_dir)
 
             # Create Json array for _write_job_file
-            # todo: Would we be able to avoid this if we remove the str() from around request.get_json() ?
-            json_obj = ast.literal_eval(json_text)
-            # print('----> json_obj: ' + str(json_obj))
+            if isinstance(json_text, str):
+                json_text = ast.literal_eval(json_text)
 
-            if not json_obj['description']:
+            if not json_text['description']:
                 raise ValueError('Missing description')
 
-            if not json_obj['steps']:
+            if not json_text['steps']:
                 raise ValueError('Missing steps')
 
-            json_obj['runNumber'] = 0
-            json_obj['lastSuccessfulRun'] = 0
-            json_obj['lastFailedRun'] = 0
-            json_obj['name'] = new_name
+            json_text['runNumber'] = 0
+            json_text['lastSuccessfulRun'] = 0
+            json_text['lastFailedRun'] = 0
+            json_text['name'] = new_name
 
             # Create job file
-            self._write_job_file(job_filename, json_obj)
+            self._write_job_file(job_filename, json_text)
 
         except (ValueError, SystemError) as error:
             message = str(error)
-            success = "0"
+            success = 0
 
         ret = {"success":success, "message":message}
 
@@ -213,7 +215,7 @@ class Jobs():
 
     def update_job(self, name):
         """ Update an existing job """
-        success = "1"
+        success = 1
         message = "-- Under Construction --"
         job_filename = "Placeholder"
 
@@ -226,7 +228,7 @@ class Jobs():
 
     def run_job(self, name):
         """ Run a specific job """
-        success = "1"
+        success = 1
         message = "Run successful"
         return_code = 0
 
@@ -278,10 +280,10 @@ class Jobs():
 
         except (OSError, subprocess.CalledProcessError, SystemError) as error:
             message = str(error)
-            success = "0"
+            success = 0
         except KeyError:
             message = 'Job has no steps'
-            success = "0"
+            success = 0
 
         # Clean up tmp workdir
         self._dirty_rm_rf(tmp_cwd)
@@ -292,7 +294,7 @@ class Jobs():
         """ Removes a job by name
         Takes a job's name and removes the directory that the job lives in
         """
-        success = "1"
+        success = 1
         message = "Job deleted"
 
         try:
@@ -312,6 +314,6 @@ class Jobs():
 
         except (OSError, ValueError) as error:
             message = str(error)
-            success = "0"
+            success = 0
 
         return { "success":success, "message":message }
