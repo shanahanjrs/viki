@@ -5,7 +5,6 @@ import os
 import subprocess
 import json
 import uuid
-import shlex
 
 class Jobs():
     """ Jobs library for viki """
@@ -28,6 +27,17 @@ class Jobs():
 
         # Name of job configuration file
         self.job_config_filename = "config.json"
+
+    def _quote_string(self, string, SingleQuote=True):
+        """ Takes a string and returns it
+        back surrounded by quotes
+        """
+        if SingleQuote:
+            quote = "'"
+        else:
+            quote = '"'
+
+        return quote + string + quote
 
     def _write_job_file(self, file, text):
         """ _write_job_file
@@ -59,7 +69,7 @@ class Jobs():
 
         return ret
 
-    def _run_shell_command(self, raw_command, output_filename):
+    def _run_shell_command(self, command, output_filename):
         """ _run_shell_command
         string:command Shell command to run
         string:file path Where the command results (stdout) are stored
@@ -70,26 +80,26 @@ class Jobs():
         # Generate output file for run results
         output_file_obj = open(output_filename, 'a')
 
-        # Put the command being executed inside the output file
-        output_file_obj.write('--> ' + raw_command + '\n')
-
-        # This fixes Popen not correctly storing the output of
-        # echo "some string" in the output file
-        command = shlex.split("'" + raw_command + "'")
+        # Generate a tmp sh file to run command from
+        sh_script_name = 'viki-' + str(uuid.uuid4())
+        with open(sh_script_name, 'w') as sh_script_obj:
+            sh_script_obj.write(command)
+            sh_script_obj.close()
 
         process = subprocess.Popen(
-            command,
+            [b'/bin/bash', b'-xc', command],
             stdout=output_file_obj,
-            stderr=subprocess.STDOUT,
-            shell=True
+            stderr=subprocess.STDOUT
         )
 
         while process.poll() is None:
             # Not finished
             pass
 
-        output_file_obj.close()
         return_code = process.poll()
+
+        output_file_obj.close()
+        self._dirty_rm_rf(sh_script_name)
 
         return (True, return_code) if return_code == 0 else (False, return_code)
 
@@ -97,7 +107,9 @@ class Jobs():
         """ Executes a quick and dirty rm -rf dirName
         Use subprocess because its easier to let bash do this than Python
         """
-        subprocess.call('rm -rf ' + dir, shell=True)
+        subprocess.call(
+            [b'/bin/bash', b'-c', 'rm -rf ' + dir]
+        )
 
 
     ### Job functions
@@ -218,7 +230,7 @@ class Jobs():
         message = "Run successful"
         return_code = 0
 
-        # Create job directory and file path names
+        # Construct job directory and file path names
         job_dir = self.jobs_path + "/" + name
         job_config_json_file = job_dir + "/" + "config.json"
 
@@ -243,8 +255,8 @@ class Jobs():
 
             # Read the file and load the json inside it
             # Otherwise raise OSError
-            jobJson = json.loads(self._read_job_file(job_config_json_file))
-            if jobJson is False or jobJson is None:
+            job_json = json.loads(self._read_job_file(job_config_json_file))
+            if job_json is False or job_json is None:
                 raise OSError('Job file could not be read')
 
             # Create filename path for output file
@@ -252,7 +264,7 @@ class Jobs():
             filename = job_dir + "/" + "output.txt"
 
             # Grab the json array "steps" from jobs/<jobName>/config.json
-            jobSteps = jobJson['steps']
+            jobSteps = job_json['steps']
 
             # Execute them individually
             # If any of these steps fail then we stop execution

@@ -37,33 +37,45 @@ def _run(job_name):
 
 def main(args):
     """ Main """
+    message = "Ok"
+    success = 1
 
-    if len(args) < 2:
-        _usage()
+    try:
 
-    viki_action = args[1]
+        if len(args) < 2:
+            _usage()
 
-    action_help = [
-            'h', '-h', '-h', 'help', '-help', '--help'
+        viki_action = args[1]
+
+        # These lists are to make sure we capture most possible spellings of our commands
+        action_help = [
+                'h', '-h', '-h', 'help', '-help', '--help'
+            ]
+
+        action_list = [
+                'l', '-l', '-l', 'll', '-ll', '--ll', 'list', '-list', '--list'
+            ]
+
+        action_run = [
+                'r', '-r', 'run', '-run', '--run'
         ]
 
-    action_list = [
-            'l', '-l', '-l', 'll', '-ll', '--ll', 'list', '-list', '--list'
-        ]
+        # Main action
+        if viki_action in action_help:
+            _usage()
+        elif viki_action in action_list:
+            message = str(_list())
+        elif viki_action in action_run:
+            message = str(_run(args[2]))
+        else:
+            _usage()
 
-    action_run = [
-            'r', '-r', 'run', '-run', '--run'
-    ]
+    except IndexError as error:
+        message = str(error)
+        success = 0
 
-    if viki_action in action_help:
-        _usage()
-    elif viki_action in action_list:
-        print(_list())
-    elif viki_action in action_run:
-        print(_run(args[2]))
-    else:
-        _usage()
-
+    print(message)
+    sys.exit(success)
 
 if __name__ == "__main__":
     main(sys.argv)
