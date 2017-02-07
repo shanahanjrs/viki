@@ -1,4 +1,4 @@
-from app.classes.jobs import Jobs
+from modules.jobs import Jobs
 import uuid
 
 job = Jobs()

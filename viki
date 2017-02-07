@@ -3,7 +3,7 @@
 ### Imports
 
 import sys
-from app.classes.jobs import Jobs
+from modules.jobs import Jobs
 
 
 ### Setup

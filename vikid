@@ -22,7 +22,7 @@ License:
 
 try:
     from flask import Flask, request, jsonify, render_template
-    from app.classes.jobs import Jobs
+    from modules.jobs import Jobs
     import os
     import sqlite3
     import logging
