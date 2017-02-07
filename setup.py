@@ -41,7 +41,7 @@ setup(
     # Dependencies
     install_requires = [
         'flask',
-        'redis',
+        'pytest',
         'gunicorn'
     ],
 
