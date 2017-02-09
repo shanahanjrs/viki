@@ -1,9 +1,27 @@
 #!/usr/bin/env python3
 
+""" Viki cli
+
+The automation framework
+
+Usage:
+    viki h|help
+    viki ll|list
+    viki r|run <job_name>
+
+Maintainer:
+    John Shanahan <shanahan.jrs@gmail.com>
+
+License:
+    Apache 2.0
+    http://www.apache.org/licenses/LICENSE-2.0
+
+"""
+
 ### Imports
 
 import sys
-from modules.jobs import Jobs
+from Viki.modules.jobs import Jobs
 
 
 ### Setup
@@ -45,22 +63,23 @@ def main(args):
         if len(args) < 2:
             _usage()
 
+        # First positional arg
         viki_action = args[1]
 
         # These lists are to make sure we capture most possible spellings of our commands
         action_help = [
-                'h', '-h', '-h', 'help', '-help', '--help'
-            ]
-
-        action_list = [
-                'l', '-l', '-l', 'll', '-ll', '--ll', 'list', '-list', '--list'
-            ]
-
-        action_run = [
-                'r', '-r', 'run', '-run', '--run'
+            'h', '-h', '-h', 'help', '-help', '--help'
         ]
 
-        # Main action
+        action_list = [
+            'l', '-l', '-l', 'll', '-ll', '--ll', 'list', '-list', '--list'
+        ]
+
+        action_run = [
+            'r', '-r', 'run', '-run', '--run'
+        ]
+
+        # Main execution
         if viki_action in action_help:
             _usage()
         elif viki_action in action_list:
@@ -74,6 +93,7 @@ def main(args):
         message = str(error)
         success = 0
 
+    # Fin
     print(message)
     sys.exit(success)
 

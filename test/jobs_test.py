@@ -1,5 +1,10 @@
-from modules.jobs import Jobs
-import uuid
+""" Viki tests
+Usage:
+    make test
+
+"""
+
+from Viki.modules.jobs import Jobs
 
 job = Jobs()
 

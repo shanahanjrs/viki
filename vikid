@@ -22,7 +22,7 @@ License:
 
 try:
     from flask import Flask, request, jsonify, render_template
-    from modules.jobs import Jobs
+    from Viki.modules.jobs import Jobs
     import os
     import sqlite3
     import logging
@@ -64,7 +64,7 @@ def jobs():
     """ List all jobs """
     logging.info('--> Func:jobs')
 
-    ret =  jsonify(job.get_jobs())
+    ret = jsonify(job.get_jobs())
 
     return ret
 
@@ -82,8 +82,8 @@ def get_job(job_name):
     if request.method == 'POST':
         # Requires "application/json" mime type and valid JSON body
         # containing description, and steps
-        jobConfig = str(request.get_json())
-        ret = job.create_job(job_name, jobConfig)
+        job_config = str(request.get_json())
+        ret = job.create_job(job_name, job_config)
 
     if request.method == 'PUT':
         # Requires "application/json" mime type and valid JSON body
