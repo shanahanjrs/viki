@@ -5,6 +5,10 @@ Usage:
 """
 
 from Viki.modules.jobs import Jobs
+import sys, os
+
+myPath = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, myPath + '/../')
 
 job = Jobs()
 
