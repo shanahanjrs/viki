@@ -2,4 +2,4 @@ test:
 		py.test
 
 install:
-		pip3 install -e .
+		python3 setup.py install

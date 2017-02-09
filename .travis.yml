@@ -5,10 +5,10 @@ python:
 
 before_install:
   - "pip install pytest"
+  - "pip install -r requirements.txt"
 
 install:
-  -  "pip install -r requirements.txt"
-  -  "pip install ."
+  -  "make install"
 
 script:
   -  py.test
