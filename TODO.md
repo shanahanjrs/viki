@@ -14,3 +14,6 @@
 - Allow POST calls to provide arguments
 - Write scheduler for running cron jobs
 - After creating basic auth and API blueprint make cli use specified host:port so it can be run remotely
+- Write json output "pretty-fier" for viki-cli
+- Add process timer / timeout option
+- Add process sigterm / sigkill
