@@ -3,12 +3,9 @@ language: python
 python:
   - "3.2"
 
-before_install:
-  - "pip install pytest"
-  - "pip install -r requirements.txt"
-
 install:
-  -  "make install"
+  -  pip install -r requirements.txt
+  -  pip install -e .
 
 script:
   -  py.test
