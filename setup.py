@@ -1,9 +1,10 @@
 from distutils.core import setup
+import src._version
 
 setup(
     # Basic info
     name         = 'viki',
-    version      = '0.0.1.dev1',
+    version      = src._version.__version__,
     url          = 'https://github.com/shanahanjrs/viki',
 
     # Author
