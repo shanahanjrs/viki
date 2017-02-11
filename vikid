@@ -22,7 +22,7 @@ License:
 
 try:
     from flask import Flask, request, jsonify, render_template
-    from Viki.modules.jobs import Jobs
+    from src.jobs.jobs import Jobs
     import os
     import sqlite3
     import logging

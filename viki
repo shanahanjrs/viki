@@ -21,14 +21,22 @@ License:
 ### Imports
 
 import sys
-from Viki.modules.jobs import Jobs
-
+from src.jobs.jobs import Jobs
+from src.application.app import App
 
 ### Setup
 debug = True
 
 # Classes / globals
 job = Jobs()
+app = App()
+
+version = app.version
+home = app.home
+
+print('Version: ' + version)
+
+print('Home: ' + home)
 
 ### Private funcs
 
