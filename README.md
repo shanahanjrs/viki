@@ -8,6 +8,12 @@
 - Uses JSON instead of xml for data formatting
 
 ## Installing
+Normal installation:
+```
+pip install viki
+```
+
+For development:
 ```
 $ git clone https://github.com/shanahanjrs/viki
 $ cd viki; pip3 install -e .
