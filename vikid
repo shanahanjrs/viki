@@ -23,6 +23,7 @@ License:
 try:
     from flask import Flask, request, jsonify, render_template
     from src.jobs.jobs import Jobs
+    from src.application.app import App
     import os
     import sqlite3
     import logging
@@ -35,7 +36,9 @@ debug = True
 
 # Classes / globals
 app = Flask(__name__)
+viki_app = App()
 job = Jobs()
+version = viki_app.version
 
 home_directory = "/usr/local/viki"
 log_dir = "/usr/local/viki/logs"
@@ -55,7 +58,7 @@ def root():
     """ Home """
     logging.info('--> Func:root')
 
-    ret = {"name":"viki", "version":"0.0.1"}
+    ret = {"name":"viki", "version":version}
 
     return render_template('home.html', data=ret)
 
