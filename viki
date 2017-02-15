@@ -8,6 +8,7 @@ Usage:
     viki h|help
     viki ll|list
     viki r|run <job_name>
+    viki c|create <job_name>
 
 Maintainer:
     John Shanahan <shanahan.jrs@gmail.com>
@@ -97,12 +98,13 @@ def main(args):
             _usage()
 
         # Possible args
-        action_setup = [ 'setup', '-setup', '--setup' ]
-        action_help = [ 'h', '-h', '-h', 'help', '-help', '--help' ]
-        action_list = [ 'l', '-l', '-l', 'll', '-ll', '--ll', 'list', '-list', '--list' ]
-        action_run = [ 'r', '-r', 'run', '-run', '--run' ]
+        action_setup = ['setup', '-setup', '--setup']
+        action_help = ['h', '-h', '--h', 'help', '-help', '--help']
+        action_list = ['l', '-l', '--l', 'll', '-ll', '--ll', 'list', '-list', '--list']
+        action_run = ['r', '-r', '--r', 'run', '-run', '--run']
+        action_create = ['c', 'create', '-create', '--create']
 
-        ### Grab first positional arg
+        # Grab first positional arg
         viki_action = args[1]
 
         # If they are running setup, make sure this gets done first
@@ -110,7 +112,9 @@ def main(args):
             _setup()
 
         # Check system setup has been run
-        if not app.check_system_setup():
+        # TODO This needs some tuning. It currently still creates the files/dirs as root
+        # and they need to be writable by other users or owned by another user (you, preferably)
+        if not application.check_system_setup():
             print('System setup check failed')
             print('Please run viki setup script:')
             print('    `sudo viki setup\'')
@@ -122,8 +126,16 @@ def main(args):
         elif viki_action in action_list:
             message = str(_list())
         elif viki_action in action_run:
-            message = str(_run(args[2]))
+            job_name = args[2]
+            # TODO Get args 3, 4, 5 ... so on if they exist. This will be how we allow cli params for job runs
+
+            message = str(_run(job_name))
+        elif viki_action in action_create:
+            # Not yet implemented
+            pass
+
         else:
+            # This is an unknown arg
             _usage()
 
     except IndexError as error:
