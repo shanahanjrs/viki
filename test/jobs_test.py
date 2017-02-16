@@ -4,19 +4,19 @@ Usage:
 
 """
 
-from src.jobs import Jobs
+from src.jobs import jobs
 import sys, os
 
 myPath = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, myPath + '/../')
 
-job = Jobs()
+job = jobs.Jobs()
 
 ### Test private functions
 
 class TestClass:
 
-    def test_quote_string_single_quotes():
+    def test_quote_string_single_quotes(self):
 
         test_variables = [
             'x', '"x', 'x""x', ' -- x', '\'\'\n'
@@ -26,7 +26,7 @@ class TestClass:
             assert job._quote_string(var) == "'" + var + "'"
 
 
-    def test_quote_string_double_quotes():
+    def test_quote_string_double_quotes(self):
 
         test_variables = [
             'x', '"x', 'x""x', ' -- x', '\'\'\n'
@@ -36,7 +36,7 @@ class TestClass:
             assert job._quote_string(var, SingleQuote=False) == '"' + var + '"'
 
 
-    def test_write_job_file():
+    def test_write_job_file(self):
 
         job_file_path = '/tmp/pytest-job-file.txt'
         job_file_text = 'This is a test message'
@@ -44,7 +44,7 @@ class TestClass:
         assert job._write_job_file(job_file_path, job_file_text) is not None
 
 
-    def test_read_job_file():
+    def test_read_job_file(self):
 
         job_file_path = '/tmp/pytest-job-file.txt'
         job_file_text = 'This is a test message'
@@ -54,7 +54,7 @@ class TestClass:
         assert job._dirty_rm_rf(job_file_path) is not None
 
 
-    def test_run_shell_command():
+    def test_run_shell_command(self):
 
         command = "echo Shanahanjrs @0xJRS"
         tmp_filename = '/tmp/pytest-job-run-file.txt'
@@ -65,12 +65,12 @@ class TestClass:
 
 ### Test public functions
 
-    def test_get_jobs():
+    def test_get_jobs(self):
 
         assert job.get_jobs()["success"] == 1
 
 
-    def test_create_job():
+    def test_create_job(self):
 
         job_name = 'viki-pytest-job-00'
         job_steps = ["echo Shanahanjrs", "pwd", "uname -a"]
@@ -79,21 +79,21 @@ class TestClass:
         assert job.create_job(job_name, job_config)["success"] == 1
 
 
-    def test_get_job_by_name():
+    def test_get_job_by_name(self):
 
         job_name = 'viki-pytest-job-00'
 
         assert job.get_job_by_name(job_name)["success"] == 1
 
 
-    def test_update_job_by_name():
+    def test_update_job_by_name(self):
 
         job_name = 'viki-pytest-job-00'
 
         assert job.update_job(job_name)["message"] == "-- Under Construction --"
 
 
-    def test_delete_job_by_name():
+    def test_delete_job_by_name(self):
 
         job_name = 'viki-pytest-job-00'
 
