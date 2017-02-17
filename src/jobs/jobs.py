@@ -115,6 +115,12 @@ class Jobs():
         return True
 
 
+    def _job_exists(self, job_name):
+        """ Simple internal function to quickly tell you if
+        a job actually exists or not
+        """
+        return os.path.exists(self.jobs_path + '/' + job_name)
+
     ### Job functions
 
     def get_jobs(self):
@@ -213,15 +219,27 @@ class Jobs():
         return ret
 
 
-    def update_job(self, name):
+    def update_job(self, name, *config):
         """ Update an existing job """
         success = 1
-        message = "-- Under Construction --"
-        job_filename = "Placeholder"
+        message = "Job successfully updated"
 
-        # Remove existing job conf
-        if os.path.exists(job_filename):
-            self._dirty_rm_rf(job_filename)
+        try:
+
+            # Check required fields first
+            #     description
+            #     steps
+            
+
+            # Find job
+            if not self._job_exists(name):
+                raise ValueError('Job not found')
+
+            # Prep new config
+
+        except ValueError as error:
+            message = str(error)
+            success = 0
 
         return { "success":success, "message":message }
 
