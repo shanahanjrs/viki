@@ -9,6 +9,8 @@ import uuid
 class Jobs():
     """ Jobs library for viki """
 
+    debug = False
+
     ### Jobs internals
 
     def __init__(self):
@@ -70,10 +72,11 @@ class Jobs():
 
         return ret
 
-    def _run_shell_command(self, command, output_filename):
+    def _run_shell_command(self, command, output_filename, job_arguments=None):
         """ _run_shell_command
         string:command Shell command to run
         string:file path Where the command results (stdout) are stored
+        array:arguments to be given to the command
         Runs the given command and stores results in a file
         Returns Tuple (True|False, Return code)
         """
@@ -87,8 +90,20 @@ class Jobs():
             sh_script_obj.write(command)
             sh_script_obj.close()
 
+        # Create the bash command
+        child_process = [b'/bin/bash', b'-xe', sh_script_name]
+
+        # If the job was passed any args, send them into the child process as well
+        if job_arguments is not None and len(job_arguments) > 0:
+            for argument in job_arguments:
+                child_process.append(str(argument))
+
+        # *!* DEBUG - show the list that is about to get piped into Popen
+        if self.debug:
+            print('Func: _run_shell_command; Var: child_process: ' + str(child_process))
+
         process = subprocess.Popen(
-            [b'/bin/bash', b'-xc', command],
+            child_process,
             stdout=output_file_obj,
             stderr=subprocess.STDOUT
         )
@@ -244,7 +259,7 @@ class Jobs():
         return { "success":success, "message":message }
 
 
-    def run_job(self, name):
+    def run_job(self, name, job_args=None):
         """ Run a specific job """
         success = 1
         message = "Run successful"
@@ -289,12 +304,11 @@ class Jobs():
             # Execute them individually
             # If any of these steps fail then we stop execution
             for step in jobSteps:
-                successBool, return_code = self._run_shell_command(step, filename)
+                successBool, return_code = self._run_shell_command(step, filename, job_args)
 
                 # If unsuccessful stop execution
                 if not successBool:
                     raise SystemError('Build step failed')
-
 
         except (OSError, subprocess.CalledProcessError, SystemError) as error:
             message = str(error)

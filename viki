@@ -81,8 +81,13 @@ def _list():
     ret = job.get_jobs()
     return str(ret)
 
-def _run(job_name):
-    ret = job.run_job(job_name)
+def _run(job_name, job_args=None):
+    """
+    :param job_name: Name of job to be run
+    :param job_args: List of arguments to send with the job to be injected at run time
+    :return:
+    """
+    ret = job.run_job(job_name, job_args)
     return str(ret)
 
 ### Main
@@ -123,13 +128,19 @@ def main(args):
         # Main execution
         if viki_action in action_help:
             _usage()
+
         elif viki_action in action_list:
             message = str(_list())
+
         elif viki_action in action_run:
             job_name = args[2]
-            # TODO Get args 3, 4, 5 ... so on if they exist. This will be how we allow cli params for job runs
 
-            message = str(_run(job_name))
+            if len(args) > 3:
+                job_args = sys.argv[3:]
+                message = str(_run(job_name, job_args))
+            else:
+                message = str(_run(job_name))
+
         elif viki_action in action_create:
             # Not yet implemented
             pass
@@ -144,7 +155,6 @@ def main(args):
 
     # Fin
     print(message)
-    sys.exit(success)
 
 if __name__ == "__main__":
     print('Version: ' + version)
