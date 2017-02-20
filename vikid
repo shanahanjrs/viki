@@ -51,7 +51,7 @@ log_level = logging.WARNING
 # sqlite_connection = sqlite3.connect(sqlite_file)
 # sqlite = sqlite_connection.cursor()
 
-### Routes
+# --- Routes
 
 @app.route("/")
 def root():
@@ -62,62 +62,17 @@ def root():
 
     return render_template('home.html', data=ret)
 
-@app.route("/jobs")
-def jobs():
-    """ List all jobs """
-    logging.info('--> Func:jobs')
+# --- Import other Routes (Api, custom routes)
 
-    ret = jsonify(job.get_jobs())
+# main api
+from src.blueprints import api_blueprint
+app.register_blueprint(api_blueprint.api_blueprint)
 
-    return ret
+# Custom route blueprints go here.
+# from src.blueprints import YOURBLUEPRINT
+# app.register_blueprint(YOURBLUEPRINT.BLUEPRINTNAME)
 
-@app.route("/job/<string:job_name>", methods = ['GET', 'POST', 'PUT', 'DELETE'])
-def get_job(job_name):
-    """ Show single job details by name """
-    logging.info('--> Func:get_job')
-
-    ret = None
-
-    if request.method == 'GET':
-        # Retrieve a jobs details
-        ret = job.get_job_by_name(job_name)
-
-    if request.method == 'POST':
-        # Requires "application/json" mime type and valid JSON body
-        # containing description, and steps
-        job_config = str(request.get_json())
-        ret = job.create_job(job_name, job_config)
-
-    if request.method == 'PUT':
-        # Requires "application/json" mime type and valid JSON body
-        # containing field/s to be updated
-        ret = job.update_job(job_name)
-
-    if request.method == 'DELETE':
-        # Deletes a job from the repository
-        ret = job.delete_job(job_name)
-
-    if ret is None:
-        ret = {"success":0, "message":"Failed"}
-
-    return jsonify(ret)
-
-@app.route("/job/<string:job_name>/run", methods = ['POST'])
-def run_job(job_name):
-    """ Run specific job by name """
-    logging.info('--> Func:run_job')
-
-    return jsonify(job.run_job(job_name))
-
-@app.route("/the3laws")
-def the_three_laws():
-    """ The three laws of robotics """
-    return jsonify('A robot may not injure a human being or, through inaction, allow a human being to come to harm. ' +
-        'A robot must obey the orders given it by human beings except where such orders would conflict with the First Law. ' +
-        'A robot must protect its own existence as long as such protection does not conflict with the First or Second Laws.')
-
-### Main
-
+# --- Main
 if __name__ == "__main__":
 
     ### Pre
