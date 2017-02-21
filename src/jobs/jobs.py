@@ -27,6 +27,9 @@ class Jobs():
         # Path to the jobs directory relative to self.home
         self.jobs_path = self.home + "/" + "jobs"
 
+        # Path to the jobs STDOUT file
+        self.job_output_file = "output.txt"
+
         # Name of job configuration file
         self.job_config_filename = "config.json"
 
@@ -59,14 +62,35 @@ class Jobs():
 
     def _read_job_file(self, file):
         """ _read_job_file
-        Takes a filename and returns the string
+        Takes a job name (abs path) and returns the string version of .../jobs/job_name/config.json
         Filename must be the full path of the file, not just the name
         contents of that file or False if it does not exist
         """
         if not file:
             return False
 
+        if not os.path.exists(file);
+            return False
+
         with open(file, 'r') as file_obj:
+            ret = file_obj.read()
+            file_obj.close()
+
+        return ret
+
+    def _read_last_run_output(self, output_file_path):
+        """ _read_last_run_output
+        Takes output_file_path (abs path) and returns the entire output of the last job run's output
+        """
+        if not output_file_path:
+            return False
+
+        output_filename = output_file_path.split('/')[-1]
+
+        if not os.path.exists(output_file_path) or output_filename != self.job_output_file:
+            return False
+
+        with open(output_file_path, 'r') as file_obj:
             ret = file_obj.read()
             file_obj.close()
 
@@ -190,6 +214,33 @@ class Jobs():
         return { "success":success, "message":message, "name":name, "config_json":contents }
 
 
+    def get_last_run_output_by_name(self, name):
+        """
+        Get the output file of a specific job and return the contents of the file
+        """
+        message = "Ok"
+        success = 1
+        contents = ""
+
+        try:
+
+            if name is None:
+                raise ValueError('Missing required field: jobName')
+
+            output_dir = self.jobs_path + "/" + name + "/" + "output.txt"
+
+            if os.path.isdir(job_dir) and os.path.exists(job_dir + "/" + self.job_config_filename):
+                contents = self._read_job_file(job_dir + "/" + self.job_config_filename)
+            else:
+                raise OSError('Job directory not found')
+
+        except (OSError, ValueError) as error:
+            message = str(error)
+            success = 0
+
+        return { "success":success, "message":message, "name":name, "config_json":contents }
+
+
     def create_job(self, new_name, json_text):
         """ Adds a job """
         message = "Job created successfully"
@@ -244,7 +295,7 @@ class Jobs():
             # Check required fields first
             #     description
             #     steps
-            
+
 
             # Find job
             if not self._job_exists(name):
