@@ -69,7 +69,7 @@ class Jobs():
         if not file:
             return False
 
-        if not os.path.exists(file);
+        if not os.path.exists(file):
             return False
 
         with open(file, 'r') as file_obj:
