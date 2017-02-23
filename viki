@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 
-""" Viki cli
+"""
+Viki cli
+~~~~~~~~
 
 The automation framework
 
@@ -16,28 +18,29 @@ Maintainer:
 License:
     Apache 2.0
     http://www.apache.org/licenses/LICENSE-2.0
-
 """
 
-### Imports
+# --- Imports
 
 import sys
-from src.jobs.jobs import Jobs
+from src.job.job import Job
 from src.application.app import App
 
-### Setup
+# --- Setup
 debug = True
 
-# Classes / globals
-job = Jobs()
+# --- Classes / globals
+
+job = Job()
 application = App()
 
 version = application.version
 
-### Private funcs
+# --- Private funcs
 
 def _version():
     print({"name":"viki", "version":version})
+
 
 def _usage():
     """ Print viki-cli usage"""
@@ -46,6 +49,7 @@ def _usage():
     print('    viki ll|list')
     print('    viki r|run <job_name>')
     sys.exit(1)
+
 
 def _setup():
     """ Create home directory, config file, and jobs directory """
@@ -77,9 +81,11 @@ def _setup():
     print('Setup finished...')
     sys.exit(0)
 
+
 def _list():
     ret = job.get_jobs()
     return str(ret)
+
 
 def _run(job_name, job_args=None):
     """
@@ -90,7 +96,7 @@ def _run(job_name, job_args=None):
     ret = job.run_job(job_name, job_args)
     return str(ret)
 
-### Main
+# --- Main
 
 def main(args):
     """ Main """
@@ -155,6 +161,7 @@ def main(args):
 
     # Fin
     print(message)
+
 
 if __name__ == "__main__":
     print('Version: ' + version)

@@ -1,11 +1,22 @@
-#!/usr/bin/env python3
+# -*- coding: utf-8 -*-  
+
+""" 
+app.py
+ ~~~~~~~~~~~~~~~~
+
+  This module implements the App class for main application details and system checks / maintenance.
+:license: Apache2, see LICENSE for more details. 
+"""
+
+# --- Imports
 
 import os
 import src._version
 import src._conf
 
+
 class App():
-    """ Jobs library for viki """
+    """ Application library for viki """
 
     def __init__(self):
         """ Initialize Application configuration
@@ -33,6 +44,7 @@ class App():
         # File permissions
         self.file_perms = 0o755
 
+
     def check_system_setup(self):
         """ This will be run every time viki starts up
         It will check to make sure the home directory exists,
@@ -48,6 +60,7 @@ class App():
 
         return True
 
+
     def create_home_dir(self):
         """ Creates the home directory """
         print('Creating home directory...')
@@ -61,6 +74,7 @@ class App():
         os.mkdir(self.home, mode=self.file_perms)
 
         return True
+
 
     def generate_config_file(self):
         """ Generates a starter viki configuration file """
@@ -86,6 +100,7 @@ class App():
 
         return True
 
+
     def generate_log_file(self):
         """ Generates a blank viki log file """
         print('Generating log file...')
@@ -105,6 +120,7 @@ class App():
         os.chmod(self.logfile_path, mode=self.file_perms)
 
         return True
+
 
     def create_jobs_dir(self):
         """ Create the jobs directory under viki home """

@@ -1,5 +1,12 @@
+# -*- coding: utf-8 -*-  
+
 """
+_conf.py
+~~~~~~~~
+
 Provides Viki configuration information.
+
+:license: Apache2, see LICENSE for more details. 
 """
 
 __config_home__ = "/usr/local/viki"

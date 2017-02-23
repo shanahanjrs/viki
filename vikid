@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 
-""" Viki daemon
+"""
+Viki daemon
+~~~~~~~~~~~
 
 The automation framework
 
@@ -18,11 +20,11 @@ License:
 
 """
 
-### Imports
+# --- Imports
 
 try:
     from flask import Flask, request, jsonify, render_template
-    from src.jobs.jobs import Jobs
+    from src.job.job import Job
     from src.application.app import App
     import os
     import sqlite3
@@ -31,13 +33,15 @@ except ImportError as error:
     exit('ImportError: ' + str(error))
 
 
-### Setup
+# --- Setup
+
 debug = True
 
-# Classes / globals
+# --- Classes / globals
+
 app = Flask(__name__)
 viki_app = App()
-job = Jobs()
+job = Job()
 version = viki_app.version
 
 home_directory = "/usr/local/viki"
@@ -73,15 +77,16 @@ app.register_blueprint(api_blueprint.api_blueprint)
 # app.register_blueprint(YOURBLUEPRINT.BLUEPRINTNAME)
 
 # --- Main
+
 if __name__ == "__main__":
 
-    ### Pre
+    # --- Pre
     if not os.path.isdir(log_dir):
         os.mkdir(log_dir)
 
     logging.basicConfig(filename=log_file, level=log_level)
 
-    ### Start
+    # --- Start
     if debug:
         # Set debug options
         app.debug = True

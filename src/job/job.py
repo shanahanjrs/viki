@@ -1,4 +1,12 @@
-#!/usr/bin/env python3
+# -*- coding: utf-8 -*-  
+
+""" 
+job.py
+ ~~~~~~
+
+  This module implements the main Job api for Viki.
+:license: Apache2, see LICENSE for more details. 
+"""
 
 import ast
 import os
@@ -6,12 +14,12 @@ import subprocess
 import json
 import uuid
 
-class Jobs():
-    """ Jobs library for viki """
+class Job():
+    """ Job library for viki """
 
     debug = False
 
-    ### Jobs internals
+    # --- Job internals
 
     def __init__(self):
         """ Initialize jobs handler
@@ -33,6 +41,7 @@ class Jobs():
         # Name of job configuration file
         self.job_config_filename = "config.json"
 
+
     def _quote_string(self, string, SingleQuote=True):
         """ Takes a string and returns it
         back surrounded by quotes
@@ -43,6 +52,7 @@ class Jobs():
             quote = '"'
 
         return quote + string + quote
+
 
     def _write_job_file(self, file, text):
         """ _write_job_file
@@ -59,6 +69,7 @@ class Jobs():
             file_obj.close()
 
         return True
+
 
     def _read_job_file(self, file):
         """ _read_job_file
@@ -78,6 +89,7 @@ class Jobs():
 
         return ret
 
+
     def _read_last_run_output(self, output_file_path):
         """ _read_last_run_output
         Takes output_file_path (abs path) and returns the entire output of the last job run's output
@@ -95,6 +107,7 @@ class Jobs():
             file_obj.close()
 
         return ret
+
 
     def _run_shell_command(self, command, output_filename, job_arguments=None):
         """ _run_shell_command
@@ -143,6 +156,7 @@ class Jobs():
 
         return (True, return_code) if return_code == 0 else (False, return_code)
 
+
     def _dirty_rm_rf(self, dir):
         """ Executes a quick and dirty rm -rf dirName
         Use subprocess because its easier to let bash do this than Python
@@ -160,7 +174,8 @@ class Jobs():
         """
         return os.path.exists(self.jobs_path + '/' + job_name)
 
-    ### Job functions
+
+    # --- Job functions
 
     def get_jobs(self):
         """
@@ -225,12 +240,13 @@ class Jobs():
         try:
 
             if name is None:
-                raise ValueError('Missing required field: jobName')
+                raise ValueError('Missing required field: job_name')
 
-            output_dir = self.jobs_path + "/" + name + "/" + "output.txt"
+            job_directory = self.jobs_path + "/" + name
+            output_file = job_directory + "/" + self.job_config_filename
 
-            if os.path.isdir(job_dir) and os.path.exists(job_dir + "/" + self.job_config_filename):
-                contents = self._read_job_file(job_dir + "/" + self.job_config_filename)
+            if os.path.isdir(job_directory) and os.path.exists(output_file):
+                contents = self._read_job_file(output_file)
             else:
                 raise OSError('Job directory not found')
 
@@ -372,6 +388,7 @@ class Jobs():
         self._dirty_rm_rf(tmp_cwd)
 
         return { "success":success, "message":message, "return_code":return_code }
+
 
     def delete_job(self, name):
         """ Removes a job by name

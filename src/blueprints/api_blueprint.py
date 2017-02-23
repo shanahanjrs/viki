@@ -1,13 +1,28 @@
-from flask import Blueprint, jsonify, request
-from src.jobs.jobs import Jobs
+# -*- coding: utf-8 -*-  
 
+""" 
+api_blueprint.py
+ ~~~~~~~~~~~~~~~~
+
+  This module implements the main Job api for Viki.
+:license: Apache2, see LICENSE for more details. 
+"""
+
+# --- Imports
+
+from flask import Blueprint, jsonify, request
+from src.job.job import Job
+
+# --- Vars
 blueprint_name = 'api_blueprint'
 template_folder_name = 'templates'
 
-job = Jobs()
+job = Job()
 
 api_blueprint = Blueprint(blueprint_name, __name__,
-                        template_folder=template_folder_name)
+                          template_folder=template_folder_name)
+
+# --- Api endpoints
 
 @api_blueprint.route("/jobs")
 def jobs():
@@ -16,6 +31,7 @@ def jobs():
     ret = jsonify(job.get_jobs())
 
     return ret
+
 
 @api_blueprint.route("/job/<string:job_name>", methods = ['GET', 'POST', 'PUT', 'DELETE'])
 def get_job(job_name):
@@ -47,11 +63,13 @@ def get_job(job_name):
 
     return jsonify(ret)
 
+
 @api_blueprint.route("/job/<string:job_name>/run", methods = ['POST'])
 def run_job(job_name):
     """ Run specific job by name """
 
     return jsonify(job.run_job(job_name))
+
 
 @api_blueprint.route("/the3laws")
 def the_three_laws():

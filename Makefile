@@ -1,3 +1,6 @@
+
+.PHONY: test install
+
 test:
 		py.test
 

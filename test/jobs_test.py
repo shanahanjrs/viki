@@ -1,18 +1,25 @@
-""" Viki tests
+"""
+Viki tests
+~~~~~~~~~~
+
 Usage:
     make test
 
 """
 
-from src.jobs import jobs
+# --- Imports
+
+from src.job.job import Job
 import sys, os
+
+# --- Vars
 
 myPath = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, myPath + '/../')
 
-job = jobs.Jobs()
+job = Job()
 
-### Test private functions
+# --- Test private functions
 
 class TestClass:
 
@@ -63,7 +70,7 @@ class TestClass:
 
         assert job._dirty_rm_rf(tmp_filename) is not None
 
-### Test public functions
+# --- Test public functions
 
     def test_get_jobs(self):
 
@@ -90,7 +97,7 @@ class TestClass:
 
         job_name = 'viki-pytest-job-00'
 
-        assert job.update_job(job_name)["message"] == "-- Under Construction --"
+        assert job.update_job(job_name)["message"] == "Job successfully updated"
 
 
     def test_delete_job_by_name(self):
