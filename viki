@@ -169,7 +169,6 @@ def main(args):
 
         elif command in action_output:
             # Show the output of the last run of the specified job
-            print('action_output: arg: ' + args[2])
             message = str(_output(args[2]))
 
         else:

@@ -99,10 +99,8 @@ class Job():
 
         output_filename = output_file_path.split('/')[-1]
 
+        # Check the file exists and is actually named correctly
         if not os.path.exists(output_file_path) or output_filename != self.job_output_file:
-            print('output filename not eq to job output file')
-            print(str(output_filename))
-            print(str(self.job_output_file))
             return False
 
         with open(output_file_path, 'r') as file_obj:
@@ -257,7 +255,7 @@ class Job():
             message = str(error)
             success = 0
 
-        return { "success":success, "message":message, "name":name, "config_json":contents }
+        return { "success":success, "message":message, "name":name, "output":contents }
 
 
     def create_job(self, new_name, json_text):
