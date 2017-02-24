@@ -11,6 +11,7 @@ Usage:
     viki ll|list
     viki r|run <job_name>
     viki c|create <job_name>
+    viki o|output <job_name>
 
 Maintainer:
     John Shanahan <shanahan.jrs@gmail.com>
@@ -96,6 +97,14 @@ def _run(job_name, job_args=None):
     ret = job.run_job(job_name, job_args)
     return str(ret)
 
+def _output(job_name):
+    """
+    :param job_name:
+    :return:
+    """
+    ret = job.get_last_run_output_by_name(job_name)
+    return ret
+
 # --- Main
 
 def main(args):
@@ -114,12 +123,13 @@ def main(args):
         action_list = ['l', '-l', '--l', 'll', '-ll', '--ll', 'list', '-list', '--list']
         action_run = ['r', '-r', '--r', 'run', '-run', '--run']
         action_create = ['c', 'create', '-create', '--create']
+        action_output = ['o', '-o', '--o', 'output', '-output', '--output']
 
         # Grab first positional arg
-        viki_action = args[1]
+        command = args[1]
 
         # If they are running setup, make sure this gets done first
-        if viki_action in action_setup:
+        if command in action_setup:
             _setup()
 
         # Check system setup has been run
@@ -131,14 +141,18 @@ def main(args):
             print('    `sudo viki setup\'')
             sys.exit(1)
 
-        # Main execution
-        if viki_action in action_help:
+        # --- Main execution
+
+        if command in action_help:
+            # Help/usage
             _usage()
 
-        elif viki_action in action_list:
+        elif command in action_list:
+            # List jobs
             message = str(_list())
 
-        elif viki_action in action_run:
+        elif command in action_run:
+            # Run a job
             job_name = args[2]
 
             if len(args) > 3:
@@ -147,12 +161,19 @@ def main(args):
             else:
                 message = str(_run(job_name))
 
-        elif viki_action in action_create:
+        elif command in action_create:
+            # Create a new job
             # Not yet implemented
+            message = "-- Not yet implemented --"
             pass
 
+        elif command in action_output:
+            # Show the output of the last run of the specified job
+            print('action_output: arg: ' + args[2])
+            message = str(_output(args[2]))
+
         else:
-            # This is an unknown arg
+            # 404 Command not found
             _usage()
 
     except IndexError as error:

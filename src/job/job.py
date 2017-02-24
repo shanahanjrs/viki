@@ -100,6 +100,9 @@ class Job():
         output_filename = output_file_path.split('/')[-1]
 
         if not os.path.exists(output_file_path) or output_filename != self.job_output_file:
+            print('output filename not eq to job output file')
+            print(str(output_filename))
+            print(str(self.job_output_file))
             return False
 
         with open(output_file_path, 'r') as file_obj:
@@ -243,10 +246,10 @@ class Job():
                 raise ValueError('Missing required field: job_name')
 
             job_directory = self.jobs_path + "/" + name
-            output_file = job_directory + "/" + self.job_config_filename
+            output_file = job_directory + "/" + self.job_output_file
 
             if os.path.isdir(job_directory) and os.path.exists(output_file):
-                contents = self._read_job_file(output_file)
+                contents = self._read_last_run_output(output_file)
             else:
                 raise OSError('Job directory not found')
 
