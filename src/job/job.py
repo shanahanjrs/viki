@@ -14,12 +14,14 @@ import subprocess
 import json
 import uuid
 
+from src.fs.fs import Fs
+
+filesystem = Fs()
+
 class Job():
     """ Job library for viki """
 
     debug = False
-
-    # --- Job internals
 
     def __init__(self):
         """ Initialize jobs handler
@@ -28,6 +30,8 @@ class Job():
         jobs_path: Path to Viki's jobs directory. Usually /usr/local/viki/jobs
         job_config_filename: Name of the config for each individual job. Usually 'config.json'
         """
+
+        # TODO Move this to a central place so all classes can use it
 
         # Change to just /home/viki eventually
         self.home = "/usr/local/viki"
@@ -42,6 +46,9 @@ class Job():
         self.job_config_filename = "config.json"
 
 
+    # --- Job internals
+
+
     def _quote_string(self, string, SingleQuote=True):
         """ Takes a string and returns it
         back surrounded by quotes
@@ -52,62 +59,6 @@ class Job():
             quote = '"'
 
         return quote + string + quote
-
-
-    def _write_job_file(self, file, text):
-        """ _write_job_file
-        Takes a filename and textblob and
-        attempts to write the text to that file
-        """
-
-        if not file or not text:
-            return False
-
-        # This will not work if the directory does not exist
-        with open(file, 'w') as file_obj:
-            file_obj.write(json.dumps(text))
-            file_obj.close()
-
-        return True
-
-
-    def _read_job_file(self, file):
-        """ _read_job_file
-        Takes a job name (abs path) and returns the string version of .../jobs/job_name/config.json
-        Filename must be the full path of the file, not just the name
-        contents of that file or False if it does not exist
-        """
-        if not file:
-            return False
-
-        if not os.path.exists(file):
-            return False
-
-        with open(file, 'r') as file_obj:
-            ret = file_obj.read()
-            file_obj.close()
-
-        return ret
-
-
-    def _read_last_run_output(self, output_file_path):
-        """ _read_last_run_output
-        Takes output_file_path (abs path) and returns the entire output of the last job run's output
-        """
-        if not output_file_path:
-            return False
-
-        output_filename = output_file_path.split('/')[-1]
-
-        # Check the file exists and is actually named correctly
-        if not os.path.exists(output_file_path) or output_filename != self.job_output_file:
-            return False
-
-        with open(output_file_path, 'r') as file_obj:
-            ret = file_obj.read()
-            file_obj.close()
-
-        return ret
 
 
     def _run_shell_command(self, command, output_filename, job_arguments=None):
@@ -153,30 +104,13 @@ class Job():
         return_code = process.poll()
 
         output_file_obj.close()
-        self._dirty_rm_rf(sh_script_name)
+        filesystem.dirty_rm_rf(sh_script_name)
 
         return (True, return_code) if return_code == 0 else (False, return_code)
 
 
-    def _dirty_rm_rf(self, dir):
-        """ Executes a quick and dirty rm -rf dirName
-        Use subprocess because its easier to let bash do this than Python
-        """
-        subprocess.call(
-            [b'/bin/bash', b'-c', 'rm -rf ' + dir]
-        )
-
-        return True
-
-
-    def _job_exists(self, job_name):
-        """ Simple internal function to quickly tell you if
-        a job actually exists or not
-        """
-        return os.path.exists(self.jobs_path + '/' + job_name)
-
-
     # --- Job functions
+
 
     def get_jobs(self):
         """
@@ -197,7 +131,7 @@ class Job():
             message = str(error)
             success = 0
 
-        ret = { "success":success, "message":message, "jobs":jobs_list }
+        ret = {"success": success, "message": message, "jobs": jobs_list}
 
         return ret
 
@@ -219,7 +153,7 @@ class Job():
             job_dir = self.jobs_path + "/" + name
 
             if os.path.isdir(job_dir) and os.path.exists(job_dir + "/" + self.job_config_filename):
-                contents = self._read_job_file(job_dir + "/" + self.job_config_filename)
+                contents = filesystem.read_job_file(job_dir + "/" + self.job_config_filename)
             else:
                 raise OSError('Job directory not found')
 
@@ -227,7 +161,7 @@ class Job():
             message = str(error)
             success = 0
 
-        return { "success":success, "message":message, "name":name, "config_json":contents }
+        return {"success": success, "message": message, "name": name, "config_json": contents}
 
 
     def get_last_run_output_by_name(self, name):
@@ -247,7 +181,7 @@ class Job():
             output_file = job_directory + "/" + self.job_output_file
 
             if os.path.isdir(job_directory) and os.path.exists(output_file):
-                contents = self._read_last_run_output(output_file)
+                contents = filesystem.read_last_run_output(output_file)
             else:
                 raise OSError('Job directory not found')
 
@@ -255,7 +189,7 @@ class Job():
             message = str(error)
             success = 0
 
-        return { "success":success, "message":message, "name":name, "output":contents }
+        return {"success": success, "message": message, "name": name, "output": contents}
 
 
     def create_job(self, new_name, json_text):
@@ -291,13 +225,13 @@ class Job():
             json_text['name'] = new_name
 
             # Create job file
-            self._write_job_file(job_filename, json_text)
+            filesystem.write_job_file(job_filename, json_text)
 
         except (ValueError, SystemError) as error:
             message = str(error)
             success = 0
 
-        ret = {"success":success, "message":message}
+        ret = {"success": success, "message": message}
 
         return ret
 
@@ -315,7 +249,7 @@ class Job():
 
 
             # Find job
-            if not self._job_exists(name):
+            if not filesystem.job_exists(name):
                 raise ValueError('Job not found')
 
             # Prep new config
@@ -324,7 +258,7 @@ class Job():
             message = str(error)
             success = 0
 
-        return { "success":success, "message":message }
+        return {"success": success, "message": message}
 
 
     def run_job(self, name, job_args=None):
@@ -358,7 +292,7 @@ class Job():
 
             # Read the file and load the json inside it
             # Otherwise raise OSError
-            job_json = json.loads(self._read_job_file(job_config_json_file))
+            job_json = json.loads(filesystem.read_job_file(job_config_json_file))
             if job_json is False or job_json is None:
                 raise OSError('Job file could not be read')
 
@@ -386,9 +320,9 @@ class Job():
             success = 0
 
         # Clean up tmp workdir
-        self._dirty_rm_rf(tmp_cwd)
+        filesystem.dirty_rm_rf(tmp_cwd)
 
-        return { "success":success, "message":message, "return_code":return_code }
+        return {"success": success, "message": message, "return_code": return_code}
 
 
     def delete_job(self, name):
@@ -411,10 +345,10 @@ class Job():
                 raise OSError('Job not found')
 
             # Remove the job directory
-            self._dirty_rm_rf(job_dir)
+            filesystem.dirty_rm_rf(job_dir)
 
         except (OSError, ValueError) as error:
             message = str(error)
             success = 0
 
-        return { "success":success, "message":message }
+        return {"success": success, "message": message}
