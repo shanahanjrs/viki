@@ -2,6 +2,7 @@
 .cache
 *.pyc
 *egg-info
+.eggs
 MANIFEST
 build
 dist

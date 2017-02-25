@@ -20,7 +20,9 @@ License:
 
 """
 
+
 # --- Imports
+
 
 try:
     from flask import Flask, request, jsonify, render_template
@@ -35,9 +37,11 @@ except ImportError as error:
 
 # --- Setup
 
+
 debug = True
 
 # --- Classes / globals
+
 
 app = Flask(__name__)
 viki_app = App()
@@ -55,28 +59,35 @@ log_level = logging.WARNING
 # sqlite_connection = sqlite3.connect(sqlite_file)
 # sqlite = sqlite_connection.cursor()
 
+
 # --- Routes
+
 
 @app.route("/")
 def root():
     """ Home """
     logging.info('--> Func:root')
 
-    ret = {"name":"viki", "version":version}
+    ret = {"name": "viki", "version": version}
 
     return render_template('home.html', data=ret)
 
+
 # --- Import other Routes (Api, custom routes)
+
 
 # main api
 from src.blueprints import api_blueprint
 app.register_blueprint(api_blueprint.api_blueprint)
 
+
 # Custom route blueprints go here.
 # from src.blueprints import YOURBLUEPRINT
 # app.register_blueprint(YOURBLUEPRINT.BLUEPRINTNAME)
 
+
 # --- Main
+
 
 if __name__ == "__main__":
 
