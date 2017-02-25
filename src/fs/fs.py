@@ -8,13 +8,12 @@ Filesystem library - internal to Viki
 :license: Apache2, see LICENSE for more details. 
 """
 
-import ast
 import os
 import subprocess
 import json
-import uuid
 
-class Fs():
+
+class Fs:
     """ Filesystem library for viki """
 
     debug = False
@@ -45,48 +44,53 @@ class Fs():
     # --- Main library
 
 
-    def write_job_file(self, file, text):
+    def write_job_file(self, job_file, text):
         """ _write_job_file
         Takes a filename and textblob and
         attempts to write the text to that file
         """
 
-        if not file or not text:
+        if not job_file or not text:
             return False
 
         # This will not work if the directory does not exist
-        with open(file, 'w') as file_obj:
+        with open(job_file, 'w') as file_obj:
             file_obj.write(json.dumps(text))
             file_obj.close()
 
         return True
 
 
-    def read_job_file(self, file):
+    @staticmethod
+    def read_job_file(job_file):
         """ _read_job_file
         Takes a job name (abs path) and returns the string version of .../jobs/job_name/config.json
         Filename must be the full path of the file, not just the name
         contents of that file or False if it does not exist
         """
-        if not file:
+        if not job_file:
             return False
 
-        if not os.path.exists(file):
+        if not os.path.exists(job_file):
             return False
 
-        with open(file, 'r') as file_obj:
+        with open(job_file, 'r') as file_obj:
             ret = file_obj.read()
             file_obj.close()
 
         return ret
 
 
-    def dirty_rm_rf(self, dir):
-        """ Executes a quick and dirty rm -rf dirName
+    def dirty_rm_rf(self, directory_name):
+        """ Executes a quick and dirty `rm -rf directory_name'
+        Works on directories or files
         Use subprocess because its easier to let bash do this than Python
+        :param directory_name:
+        :returns bool:
         """
+
         subprocess.call(
-            [b'/bin/bash', b'-c', 'rm -rf ' + dir]
+            [b'/bin/bash', b'-c', 'rm -rf ' + directory_name]
         )
 
         return True
@@ -95,6 +99,8 @@ class Fs():
     def job_exists(self, job_name):
         """ Simple internal function to quickly tell you if
         a job actually exists or not
+        :param job_name:
+        :returns bool:
         """
         return os.path.exists(self.jobs_path + '/' + job_name)
 

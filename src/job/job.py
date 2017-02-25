@@ -18,7 +18,8 @@ from src.fs.fs import Fs
 
 filesystem = Fs()
 
-class Job():
+
+class Job:
     """ Job library for viki """
 
     debug = False
@@ -49,11 +50,13 @@ class Job():
     # --- Job internals
 
 
-    def _quote_string(self, string, SingleQuote=True):
+    @staticmethod
+    def _quote_string(string, single_quote=True):
         """ Takes a string and returns it
         back surrounded by quotes
         """
-        if SingleQuote:
+
+        if single_quote:
             quote = "'"
         else:
             quote = '"'
@@ -136,7 +139,7 @@ class Job():
         return ret
 
 
-    def get_job_by_name(self, name):
+    def get_job_by_name(self, job_name):
         """
         Get details of a single job by name
         string:name Name of specific job
@@ -147,10 +150,10 @@ class Job():
 
         try:
 
-            if name is None:
-                raise ValueError('Missing required field: jobName')
+            if job_name is None:
+                raise ValueError('Missing required field: job_name')
 
-            job_dir = self.jobs_path + "/" + name
+            job_dir = self.jobs_path + "/" + job_name
 
             if os.path.isdir(job_dir) and os.path.exists(job_dir + "/" + self.job_config_filename):
                 contents = filesystem.read_job_file(job_dir + "/" + self.job_config_filename)
@@ -161,7 +164,7 @@ class Job():
             message = str(error)
             success = 0
 
-        return {"success": success, "message": message, "name": name, "config_json": contents}
+        return {"success": success, "message": message, "name": job_name, "config_json": contents}
 
 
     def get_last_run_output_by_name(self, name):
@@ -236,7 +239,7 @@ class Job():
         return ret
 
 
-    def update_job(self, name, *config):
+    def update_job(self, name, config=None):
         """ Update an existing job """
         success = 1
         message = "Job successfully updated"
@@ -301,15 +304,15 @@ class Job():
             filename = job_dir + "/" + "output.txt"
 
             # Grab the json array "steps" from jobs/<jobName>/config.json
-            jobSteps = job_json['steps']
+            job_steps = job_json['steps']
 
             # Execute them individually
             # If any of these steps fail then we stop execution
-            for step in jobSteps:
-                successBool, return_code = self._run_shell_command(step, filename, job_args)
+            for step in job_steps:
+                success_bool, return_code = self._run_shell_command(step, filename, job_args)
 
                 # If unsuccessful stop execution
-                if not successBool:
+                if not success_bool:
                     raise SystemError('Build step failed')
 
         except (OSError, subprocess.CalledProcessError, SystemError) as error:
