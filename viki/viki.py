@@ -21,26 +21,20 @@ License:
     http://www.apache.org/licenses/LICENSE-2.0
 """
 
-# --- Imports
+__author__ = 'John Shanahan'
+__author_email__ = 'shanahan.jrs@gmail.com'
+__version__ = '0.1.1'
 
-import sys
-from src.job.job import Job
-from src.application.app import App
+# --- Imports
+import requests
 
 # --- Setup
 debug = True
 
-# --- Classes / globals
-
-job = Job()
-application = App()
-
-version = application.version
-
 # --- Private funcs
 
 def _version():
-    print({"name":"viki", "version":version})
+    print({"name":"viki", "version":__version__})
 
 
 def _usage():
@@ -50,37 +44,6 @@ def _usage():
     print('    viki ll|list')
     print('    viki r|run <job_name>')
     sys.exit(1)
-
-
-def _setup():
-    """ Create home directory, config file, and jobs directory """
-
-    from os import getuid
-    uid = getuid()
-
-    if uid is not 0:
-        print('Must be run with sudo')
-        sys.exit(1)
-
-    # Create home, config file, and job dir
-    create_home = application.create_home_dir()
-    if not create_home:
-        print('Could not create home directory or it already exists...')
-
-    create_jobs_dir = application.create_jobs_dir()
-    if not create_jobs_dir:
-        print('Could not create jobs directory or it already exists...')
-
-    create_conf_file = application.generate_config_file()
-    if not create_conf_file:
-        print('Could not create conf file or it already exists...')
-
-    create_log_file = application.generate_log_file()
-    if not create_log_file:
-        print('Could not create log file or it already exists...')
-
-    print('Setup finished...')
-    sys.exit(0)
 
 
 def _list():
