@@ -21,21 +21,19 @@ License:
     http://www.apache.org/licenses/LICENSE-2.0
 """
 
-__author__ = 'John Shanahan'
-__author_email__ = 'shanahan.jrs@gmail.com'
-__version__ = '0.1.1'
-
 # --- Imports
+
+import viki
 import requests
+import sys
+
 
 # --- Setup
+
 debug = True
 
+
 # --- Private funcs
-
-def _version():
-    print({"name":"viki", "version":__version__})
-
 
 def _usage():
     """ Print viki-cli usage"""
@@ -47,7 +45,10 @@ def _usage():
 
 
 def _list():
-    ret = job.get_jobs()
+    """
+    :return:
+    """
+    ret = '*!* refactoring *!*'
     return str(ret)
 
 
@@ -57,7 +58,7 @@ def _run(job_name, job_args=None):
     :param job_args: List of arguments to send with the job to be injected at run time
     :return:
     """
-    ret = job.run_job(job_name, job_args)
+    ret = '*!* refactoring *!*'
     return str(ret)
 
 def _output(job_name):
@@ -65,7 +66,7 @@ def _output(job_name):
     :param job_name:
     :return:
     """
-    ret = job.get_last_run_output_by_name(job_name)
+    ret = '*!* refactoring *!*'
     return ret
 
 # --- Main
@@ -92,17 +93,17 @@ def main(args):
         command = args[1]
 
         # If they are running setup, make sure this gets done first
-        if command in action_setup:
-            _setup()
+        #if command in action_setup:
+        #    _setup()
 
         # Check system setup has been run
         # TODO This needs some tuning. It currently still creates the files/dirs as root
         # and they need to be writable by other users or owned by another user (you, preferably)
-        if not application.check_system_setup():
-            print('System setup check failed')
-            print('Please run viki setup script:')
-            print('    `sudo viki setup\'')
-            sys.exit(1)
+        # if not application.check_system_setup():
+        #     print('System setup check failed')
+        #     print('Please run viki setup script:')
+        #     print('    `sudo viki setup\'')
+        #     sys.exit(1)
 
         # --- Main execution
 
@@ -147,5 +148,5 @@ def main(args):
 
 
 if __name__ == "__main__":
-    print('Version: ' + version)
+    print("{name} {version}".format(name=viki.__name__, version=viki.__version__))
     main(sys.argv)

@@ -1,15 +1,14 @@
 from setuptools import setup, find_packages
-import Viki.viki
+import viki
 
 setup(
-    name='viki',
+    name=viki.__name__,
     version=viki.__version__,
-    url='https://vikiautomation.com',
-    author='John Shanahan',
-    author_email='shanahan.jrs@gmail.com',
-    license='Apache',
-    description='Viki is a command line web hook reciever and developer assisstant '
-    'that can execute tasks remotely or on demand.',
+    url=viki.__url__,
+    author=viki.__author__,
+    author_email=viki.__author_email__,
+    license=viki.__license__,
+    description=viki.__description_long__,
     classifiers=[
         'Development Status :: 2 - Pre-Alpha',
         'Intended Audience :: Developers',
@@ -25,8 +24,8 @@ setup(
     install_requires=[
         'requests'
     ],
-    keywords='deployment setuptools development builds automation webhooks scheduler job-runner',
+    keywords=viki.__keywords__,
     include_package_data=True,
     packages=find_packages(),
-    scripts=['viki/viki.py']
+    scripts=['bin/viki']
 )
