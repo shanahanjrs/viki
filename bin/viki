@@ -23,9 +23,11 @@ License:
 
 # --- Imports
 
-import viki
+import argparse
 import requests
 import sys
+
+import viki
 
 
 # --- Setup
@@ -41,7 +43,9 @@ def _usage():
     print('    viki h|help')
     print('    viki ll|list')
     print('    viki r|run <job_name>')
-    sys.exit(1)
+    print('    viki c|create <job_name>')
+    print('    viki o|output <job_name>')
+    sys.exit()
 
 
 def _list():
@@ -75,47 +79,28 @@ def main(args):
     """ Main """
     message = "Ok"
     success = 1
+    host = "localhost"
+    port = "5000"
 
     try:
 
-        if len(args) < 2:
-            _usage()
-
-        # Possible args
-        action_setup = ['setup', '-setup', '--setup']
-        action_help = ['h', '-h', '--h', 'help', '-help', '--help']
-        action_list = ['l', '-l', '--l', 'll', '-ll', '--ll', 'list', '-list', '--list']
-        action_run = ['r', '-r', '--r', 'run', '-run', '--run']
-        action_create = ['c', 'create', '-create', '--create']
-        action_output = ['o', '-o', '--o', 'output', '-output', '--output']
-
-        # Grab first positional arg
-        command = args[1]
-
-        # If they are running setup, make sure this gets done first
-        #if command in action_setup:
-        #    _setup()
-
-        # Check system setup has been run
-        # TODO This needs some tuning. It currently still creates the files/dirs as root
-        # and they need to be writable by other users or owned by another user (you, preferably)
-        # if not application.check_system_setup():
-        #     print('System setup check failed')
-        #     print('Please run viki setup script:')
-        #     print('    `sudo viki setup\'')
-        #     sys.exit(1)
+        # Parse cli arguments
+        parser = argparse.ArgumentParser()
+        parser.add_argument(
+            'command',
+            choices=['list', 'run', 'create', 'output'],
+            help='Command: [ list|run|create|output ]'
+        )
+        args = parser.parse_args()
+        command = args.command
 
         # --- Main execution
 
-        if command in action_help:
-            # Help/usage
-            _usage()
-
-        elif command in action_list:
+        if command == 'list':
             # List jobs
             message = str(_list())
 
-        elif command in action_run:
+        elif command == 'run':
             # Run a job
             job_name = args[2]
 
@@ -125,13 +110,12 @@ def main(args):
             else:
                 message = str(_run(job_name))
 
-        elif command in action_create:
+        elif command == 'create':
             # Create a new job
-            # Not yet implemented
             message = "-- Not yet implemented --"
             pass
 
-        elif command in action_output:
+        elif command == 'output':
             # Show the output of the last run of the specified job
             message = str(_output(args[2]))
 
