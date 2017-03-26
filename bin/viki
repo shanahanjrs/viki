@@ -75,62 +75,58 @@ def _output(job_name):
 
 # --- Main
 
-def main(args):
+def main():
     """ Main """
     message = "Ok"
     success = 1
     host = "localhost"
     port = "5000"
 
-    try:
+    # Parse cli arguments
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        'command',
+        choices=['list', 'run', 'create', 'output'],
+        help='Command: [ list|run|create|output ]'
+    )
+    args = parser.parse_args()
 
-        # Parse cli arguments
-        parser = argparse.ArgumentParser()
-        parser.add_argument(
-            'command',
-            choices=['list', 'run', 'create', 'output'],
-            help='Command: [ list|run|create|output ]'
-        )
-        args = parser.parse_args()
-        command = args.command
+    # Get command
+    command = args.command
 
-        # --- Main execution
+    # --- Main execution
+    print("{name} {version}".format(name=viki.__name__, version=viki.__version__))
 
-        if command == 'list':
-            # List jobs
-            message = str(_list())
+    if command == 'list':
+        # List jobs
+        message = str(_list())
 
-        elif command == 'run':
-            # Run a job
-            job_name = args[2]
+    elif command == 'run':
+        # Run a job
+        job_name = args[2]
 
-            if len(args) > 3:
-                job_args = sys.argv[3:]
-                message = str(_run(job_name, job_args))
-            else:
-                message = str(_run(job_name))
-
-        elif command == 'create':
-            # Create a new job
-            message = "-- Not yet implemented --"
-            pass
-
-        elif command == 'output':
-            # Show the output of the last run of the specified job
-            message = str(_output(args[2]))
-
+        if len(args) > 3:
+            job_args = sys.argv[3:]
+            message = str(_run(job_name, job_args))
         else:
-            # 404 Command not found
-            _usage()
+            message = str(_run(job_name))
 
-    except IndexError as error:
-        message = str(error)
-        success = 0
+    elif command == 'create':
+        # Create a new job
+        message = "-- Not yet implemented --"
+
+    elif command == 'output':
+        # Show the output of the last run of the specified job
+        message = str(_output(args[2]))
+
+    else:
+        # 404 Command not found
+        _usage()
+
 
     # Fin
     print(message)
 
 
 if __name__ == "__main__":
-    print("{name} {version}".format(name=viki.__name__, version=viki.__version__))
-    main(sys.argv)
+    main()
