@@ -48,12 +48,14 @@ def _usage():
     sys.exit()
 
 
-def _list():
+def _list(host, port):
     """
     :return:
     """
-    ret = '*!* refactoring *!*'
-    return str(ret)
+    get_jobs_api_endpoint = '/jobs'
+    get_jobs_url = "{host}:{port}{api}".format(host=host, port=port, api=get_jobs_api_endpoint)
+    get_jobs = requests.get(get_jobs_url)
+    return str(get_jobs)
 
 
 def _run(job_name, job_args=None):
@@ -79,7 +81,7 @@ def main():
     """ Main """
     message = "Ok"
     success = 1
-    host = "localhost"
+    host = "http://localhost"
     port = "5000"
 
     # Parse cli arguments
@@ -99,7 +101,7 @@ def main():
 
     if command == 'list':
         # List jobs
-        message = str(_list())
+        message = _list(host, port)
 
     elif command == 'run':
         # Run a job
