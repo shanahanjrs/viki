@@ -30,12 +30,7 @@ import sys
 import viki
 
 
-# --- Setup
-
-debug = True
-
-
-# --- Private funcs
+# --- Private lib
 
 def _usage():
     """ Print viki-cli usage"""
@@ -54,18 +49,24 @@ def _list(host, port):
     """
     get_jobs_api_endpoint = '/jobs'
     get_jobs_url = "{host}:{port}{api}".format(host=host, port=port, api=get_jobs_api_endpoint)
+
     get_jobs = requests.get(get_jobs_url)
-    return str(get_jobs)
+
+    return get_jobs.text
 
 
-def _run(job_name, job_args=None):
+def _run(host, port, job_name, job_args=None):
     """
     :param job_name: Name of job to be run
     :param job_args: List of arguments to send with the job to be injected at run time
     :return:
     """
-    ret = '*!* refactoring *!*'
-    return str(ret)
+    run_job_api_endpoint = '/job/{job_name}/run'.format(job_name=job_name)
+    run_job_url = "{host}:{port}{api}".format(host=host, port=port, api=run_job_api_endpoint)
+
+    run_job = requests.post(run_job_url)
+
+    return run_job.text
 
 def _output(job_name):
     """
@@ -75,29 +76,87 @@ def _output(job_name):
     ret = '*!* refactoring *!*'
     return ret
 
+
 # --- Main
 
 def main():
     """ Main """
     message = "Ok"
     success = 1
-    host = "http://localhost"
-    port = "5000"
 
-    # Parse cli arguments
+    # --- Define cli args/flags
     parser = argparse.ArgumentParser()
+
+    # Main command
     parser.add_argument(
         'command',
         choices=['list', 'run', 'create', 'output'],
+        nargs=argparse.REMAINDER,
         help='Command: [ list|run|create|output ]'
     )
+
+    # Host to connect to
+    parser.add_argument(
+        '--host',
+        default="http://localhost",
+        help='Vikid host to connect to (default: "http://localhost")'
+    )
+
+    # Port to connect to host on
+    parser.add_argument(
+        '--port',
+        default="5000",
+        help='Port to connect to Vikid host on (default: "5000")'
+    )
+
+    # Output as json flag
+    parser.add_argument(
+        '--json',
+        action='store_true',
+        help='Show output as json (default: False)'
+    )
+
+    # Verbose execution
+    parser.add_argument(
+        '-V', '--verbose',
+        action='store_true',
+        help='Verbose execution details (default: False)'
+    )
+
+    # Version number flag
+    parser.add_argument(
+        '-v', '--version',
+        action='version',
+        version='{}'.format(viki.__version__),
+        help='Display viki version'
+    )
+
+    # --- Parse cli args/flags
     args = parser.parse_args()
 
-    # Get command
-    command = args.command
+    # Flags
+    output_as_json = args.json
+    host = args.host
+    port = args.port
+    verbose = args.verbose
+
+    # Command
+    command = args.command[0]
+
+    command_args_num = len(args.command) - 1
+
+    if command_args_num > 0:
+        command_args = args.command[1:]
 
     # --- Main execution
-    print("{name} {version}".format(name=viki.__name__, version=viki.__version__))
+
+    print('Command: ' + command)
+
+    if verbose:
+        print('verbose: ' + str(verbose))
+        print('output_as_json: ' + str(output_as_json))
+        print('host: ' + str(host))
+        print('port: ' + str(port))
 
     if command == 'list':
         # List jobs
@@ -105,13 +164,18 @@ def main():
 
     elif command == 'run':
         # Run a job
-        job_name = args[2]
+        if command_args_num < 1:
+            print('Must specify job name to run.')
+            sys.exit(1)
 
-        if len(args) > 3:
-            job_args = sys.argv[3:]
-            message = str(_run(job_name, job_args))
-        else:
-            message = str(_run(job_name))
+        job_name = command_args[0]
+        message = _run(host, port, job_name)
+
+#        if len(args) > 3:
+#            job_args = sys.argv[3:]
+#            message = str(_run(job_name, job_args))
+#        else:
+#            message = str(_run(job_name))
 
     elif command == 'create':
         # Create a new job
@@ -120,10 +184,6 @@ def main():
     elif command == 'output':
         # Show the output of the last run of the specified job
         message = str(_output(args[2]))
-
-    else:
-        # 404 Command not found
-        _usage()
 
 
     # Fin
