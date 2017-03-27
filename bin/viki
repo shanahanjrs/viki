@@ -32,17 +32,6 @@ import viki
 
 # --- Private lib
 
-def _usage():
-    """ Print viki-cli usage"""
-    print('Usage:')
-    print('    viki h|help')
-    print('    viki ll|list')
-    print('    viki r|run <job_name>')
-    print('    viki c|create <job_name>')
-    print('    viki o|output <job_name>')
-    sys.exit()
-
-
 def _list(host, port):
     """
     :return:
@@ -67,6 +56,7 @@ def _run(host, port, job_name, job_args=None):
     run_job = requests.post(run_job_url)
 
     return run_job.text
+
 
 def _output(job_name):
     """
