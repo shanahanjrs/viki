@@ -39,9 +39,9 @@ def _list(host, port):
     get_jobs_api_endpoint = '/jobs'
     get_jobs_url = "{host}:{port}{api}".format(host=host, port=port, api=get_jobs_api_endpoint)
 
-    get_jobs = requests.get(get_jobs_url)
+    ret = requests.get(get_jobs_url)
 
-    return get_jobs.text
+    return ret.text
 
 
 def _run(host, port, job_name, job_args=None):
@@ -53,18 +53,31 @@ def _run(host, port, job_name, job_args=None):
     run_job_api_endpoint = '/job/{job_name}/run'.format(job_name=job_name)
     run_job_url = "{host}:{port}{api}".format(host=host, port=port, api=run_job_api_endpoint)
 
-    run_job = requests.post(run_job_url)
+    ret = requests.post(run_job_url)
 
-    return run_job.text
+    return ret.text
 
 
-def _output(job_name):
+def _create(host, port, job_name):
     """
     :param job_name:
     :return:
     """
     ret = '*!* refactoring *!*'
     return ret
+
+
+def _output(host, port, job_name):
+    """
+    :param job_name:
+    :return:
+    """
+    job_output_api_endpoint = '/job/{job_name}/output'.format(job_name=job_name)
+    job_output_url = "{host}:{port}{api}".format(host=host, port=port, api=run_job_api_endpoint)
+
+    ret = requests.post(job_output_url)
+
+    return ret.text
 
 
 # --- Main
