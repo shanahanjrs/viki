@@ -36,7 +36,7 @@ def _list(host, port):
     """
     :return:
     """
-    get_jobs_api_endpoint = '/jobs'
+    get_jobs_api_endpoint = '/api/v1/jobs'
     get_jobs_url = "{host}:{port}{api}".format(host=host, port=port, api=get_jobs_api_endpoint)
 
     ret = requests.get(get_jobs_url)
@@ -50,7 +50,7 @@ def _run(host, port, job_name, job_args=None):
     :param job_args: List of arguments to send with the job to be injected at run time
     :return:
     """
-    run_job_api_endpoint = '/job/{job_name}/run'.format(job_name=job_name)
+    run_job_api_endpoint = '/api/v1/job/{job_name}/run'.format(job_name=job_name)
     run_job_url = "{host}:{port}{api}".format(host=host, port=port, api=run_job_api_endpoint)
 
     ret = requests.post(run_job_url)
@@ -72,7 +72,7 @@ def _output(host, port, job_name):
     :param job_name:
     :return:
     """
-    job_output_api_endpoint = '/job/{job_name}/output'.format(job_name=job_name)
+    job_output_api_endpoint = '/api/v1/job/{job_name}/output'.format(job_name=job_name)
     job_output_url = "{host}:{port}{api}".format(host=host, port=port, api=run_job_api_endpoint)
 
     ret = requests.post(job_output_url)
@@ -108,8 +108,8 @@ def main():
     # Port to connect to host on
     parser.add_argument(
         '--port',
-        default="5000",
-        help='Port to connect to Vikid host on (default: "5000")'
+        default="9898",
+        help='Port to connect to Vikid host on (default: "9898")'
     )
 
     # Output as json flag
@@ -153,8 +153,6 @@ def main():
 
     # --- Main execution
 
-    print('Command: ' + command)
-
     if verbose:
         print('verbose: ' + str(verbose))
         print('output_as_json: ' + str(output_as_json))
@@ -174,19 +172,13 @@ def main():
         job_name = command_args[0]
         message = _run(host, port, job_name)
 
-#        if len(args) > 3:
-#            job_args = sys.argv[3:]
-#            message = str(_run(job_name, job_args))
-#        else:
-#            message = str(_run(job_name))
-
     elif command == 'create':
         # Create a new job
         message = "-- Not yet implemented --"
 
     elif command == 'output':
         # Show the output of the last run of the specified job
-        message = str(_output(args[2]))
+        message = str(_output(host, port, args[2]))
 
 
     # Fin

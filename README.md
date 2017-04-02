@@ -35,13 +35,13 @@ positional arguments:
 optional arguments:
   -h, --help            show this help message and exit
   --host HOST           Vikid host to connect to (default: "http://localhost")
-  --port PORT           Port to connect to Vikid host on (default: "5000")
+  --port PORT           Port to connect to Vikid host on (default: "9898")
   --json                Show output as json (default: False)
   -V, --verbose         Verbose execution details (default: False)
   -v, --version         Display viki version
 ```
 
-By default `viki` will look for the daemon locally on port 5000, if you are connecting to a remote server you will have to specify the location:
+By default `viki` will look for the daemon locally on port 9898, if you are connecting to a remote server you will have to specify the location:
 
 `$ viki list --host example.com --port 8080`
 
