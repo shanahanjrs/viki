@@ -85,7 +85,7 @@ def _output(host, port, job_name):
 def main():
     """ Main """
     message = "Ok"
-    success = 1
+    return_code = 0
 
     # --- Define cli args/flags
     parser = argparse.ArgumentParser()
@@ -180,10 +180,14 @@ def main():
         # Show the output of the last run of the specified job
         message = str(_output(host, port, args[2]))
 
+    else:
+        message = "Command not found"
+        return_code = 1
+
 
     # Fin
     print(message)
-
+    sys.exit(return_code)
 
 if __name__ == "__main__":
     main()
