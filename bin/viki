@@ -39,9 +39,13 @@ def _list(host, port):
     get_jobs_api_endpoint = '/api/v1/jobs'
     get_jobs_url = "{host}:{port}{api}".format(host=host, port=port, api=get_jobs_api_endpoint)
 
-    ret = requests.get(get_jobs_url)
+    try:
+        ret = requests.get(get_jobs_url)
+        out = ret.text
+    except Exception as e:
+        out = e
 
-    return ret.text
+    return out
 
 
 def _run(host, port, job_name, job_args=None):
@@ -53,9 +57,13 @@ def _run(host, port, job_name, job_args=None):
     run_job_api_endpoint = '/api/v1/job/{job_name}/run'.format(job_name=job_name)
     run_job_url = "{host}:{port}{api}".format(host=host, port=port, api=run_job_api_endpoint)
 
-    ret = requests.post(run_job_url)
+    try:
+        ret = requests.post(run_job_url)
+        out = ret.text
+    except Exception as e:
+        out = e
 
-    return ret.text
+    return out
 
 
 def _create(host, port, job_name):
@@ -75,10 +83,13 @@ def _output(host, port, job_name):
     job_output_api_endpoint = '/api/v1/job/{job_name}/output'.format(job_name=job_name)
     job_output_url = "{host}:{port}{api}".format(host=host, port=port, api=run_job_api_endpoint)
 
-    ret = requests.post(job_output_url)
+    try:
+        ret = requests.post(job_output_url)
+        out = ret.text
+    except Exception as e:
+        out = e
 
-    return ret.text
-
+    return out
 
 # --- Main
 
@@ -143,13 +154,13 @@ def main():
     port = args.port
     verbose = args.verbose
 
-    # Command
-    command = args.command[0]
-
-    command_args_num = len(args.command) - 1
+    # --- Command
+    command_args_num = len(args.command)
 
     if command_args_num > 0:
         command_args = args.command[1:]
+
+    command = args.command[0]
 
     # --- Main execution
 
@@ -183,7 +194,6 @@ def main():
     else:
         message = "Command not found"
         return_code = 1
-
 
     # Fin
     print(message)

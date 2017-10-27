@@ -27,5 +27,10 @@ setup(
     keywords=viki.__keywords__,
     include_package_data=True,
     packages=find_packages(),
-    scripts=['bin/viki']
+    scripts=['bin/viki'],
+    entry_points = {
+        'console_scripts': [
+            'viki = viki.bin.viki:main'
+            ]
+        }
 )
