@@ -106,7 +106,7 @@ def main():
         'command',
         choices=['list', 'run', 'create', 'output'],
         nargs=argparse.REMAINDER,
-        help='Command: [ list|run|create|output ]'
+        help='Commands: [ list|run|ps|create|output ]'
     )
 
     # Host to connect to
@@ -145,6 +145,13 @@ def main():
         help='Display viki version'
     )
 
+    # Setup system - build viki home dir and log dir, etc
+    parser.add_argument(
+        '--setup-system',
+        action='store_true',
+        help='Setup the viki home and logging directories along with other misc items required to run.'
+    )
+
     # --- Parse cli args/flags
     args = parser.parse_args()
 
@@ -153,12 +160,16 @@ def main():
     host = args.host
     port = args.port
     verbose = args.verbose
+    setup_system = args.setup_system
 
     # --- Command
     command_args_num = len(args.command)
 
     if command_args_num > 0:
         command_args = args.command[1:]
+    else:
+        parser.print_help()
+        sys.exit(1)
 
     command = args.command[0]
 
@@ -169,8 +180,12 @@ def main():
         print('output_as_json: ' + str(output_as_json))
         print('host: ' + str(host))
         print('port: ' + str(port))
+        print('setup_system: ' + str(setup_system))
 
-    if command == 'list':
+    if setup_system:
+        message = 'Setup system called...'
+
+    elif command == 'list':
         # List jobs
         message = _list(host, port)
 
@@ -190,6 +205,17 @@ def main():
     elif command == 'output':
         # Show the output of the last run of the specified job
         message = str(_output(host, port, args[2]))
+
+    elif command == 'ps':
+        # Show currently running jobs
+        # TODO Hook up to vikid endpoint
+        message = '[ps] Dummy output:\n' +\
+                  'Name     created         etc\n' +\
+                  '----     -------         ---\n' +\
+                  'Test job 9m ago          foo'
+
+    elif command == '--setup':
+        message = 'Setup was called'
 
     else:
         message = "Command not found"
