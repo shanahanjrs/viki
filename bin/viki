@@ -28,6 +28,7 @@ import requests
 import sys
 
 import viki
+from viki.utils import _usage
 
 
 # --- Private lib
@@ -159,6 +160,8 @@ def main():
 
     if command_args_num > 0:
         command_args = args.command[1:]
+    else:
+        _usage()
 
     command = args.command[0]
 
